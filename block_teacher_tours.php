@@ -27,14 +27,10 @@
  */
 class block_teacher_tours extends block_base
 {
-class block_teacher_tours extends block_base
-{
 
     /**
      * Initialize the block
      */
-    public function init()
-    {
     public function init()
     {
         $this->title = get_string('pluginname', 'block_teacher_tours');
@@ -47,8 +43,8 @@ class block_teacher_tours extends block_base
      */
     public function get_content()
     {
-    public function get_content()
-    {
+        global $OUTPUT;
+
         if ($this->content !== null) {
             return $this->content;
         }
@@ -59,6 +55,10 @@ class block_teacher_tours extends block_base
 
         // Check if user has permission to view this block.
         $context = context_block::instance($this->instance->id);
+
+        //TODO get all tours for the current course
+        $tours = $this->get_all_tours_for_course($this->page->course->id);
+
         if (has_capability('block/teacher_tours:view', $context)) {
             $this->content->text = '[Content visible to teachers]';
         }
@@ -68,10 +68,7 @@ class block_teacher_tours extends block_base
         }
 
         // Main block content
-        $this->content->text = html_writer::div(
-            get_string('blockcontent', 'block_teacher_tours'),
-            'block-example-content'
-        );
+        $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', []);
 
         return $this->content;
     }
@@ -81,10 +78,23 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function instance_allow_multiple() {
+    public function instance_allow_multiple()
+    {
         return false;
     }
 
+    /**
+     * Get all tours for the current course
+     *
+     * @param int $courseid
+     * @return array
+     */
+    public function get_all_tours_for_course($courseid)
+    {
+        global $DB;
+        $tours = $DB->get_records('tool_user_tours', ['pathname' => $courseid]);
+        return $tours;
+    }
 
     /**
      * Add required JavaScript.

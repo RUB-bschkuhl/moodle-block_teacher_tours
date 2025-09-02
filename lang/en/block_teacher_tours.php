@@ -25,8 +25,40 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Teacher Tours';
-$string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
-
-$string['teacher_tours'] = 'Example Block';
 $string['teacher_tours:addinstance'] = 'Add a new teacher tours block';
-$string['teacher_tours:view'] = 'View the Teacher Tours block.';
+$string['teacher_tours:myaddinstance'] = 'Add a new teacher tours block to Dashboard';
+$string['teacher_tours:view'] = 'View the Teacher Tours block';
+
+// Template strings
+$string['blockdescription'] = 'Create guided tours for your course to help students navigate and understand course content.';
+$string['existingtours'] = 'Existing Tours';
+$string['createnewtour'] = 'Create New Tour';
+$string['managetours'] = 'Manage Tours';
+$string['creatingtour'] = 'Creating New Tour';
+$string['tourinstructions'] = 'Click on course elements to add them as tour steps, then add descriptions for each step.';
+$string['savetour'] = 'Save Tour';
+$string['enabled'] = 'Enabled';
+$string['disabled'] = 'Disabled';
+
+// Text editor strings
+$string['editstep'] = 'Edit Tour Step';
+$string['steptitle'] = 'Step Title';
+$string['stepcontent'] = 'Step Content';
+$string['entertitle'] = 'Enter a title for this step';
+$string['entercontent'] = 'Enter the content that will be displayed in this step';
+$string['targettype'] = 'Target Type';
+$string['targetvalue'] = 'Target Value';
+$string['placement'] = 'Placement';
+$string['placementtop'] = 'Top';
+$string['placementbottom'] = 'Bottom';
+$string['placementleft'] = 'Left';
+$string['placementright'] = 'Right';
+$string['options'] = 'Options';
+$string['backdrop'] = 'Show backdrop';
+$string['orphan'] = 'Show even if target not found';
+$string['advanced'] = 'Advanced';
+$string['reflex'] = 'Auto-advance on click';
+$string['addstep'] = 'Add Step';
+$string['preview'] = 'Preview';
+
+$string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
