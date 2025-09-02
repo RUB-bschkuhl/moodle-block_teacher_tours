@@ -17,33 +17,33 @@
 /**
  * Example block view page.
  *
- * @package     block_teacher_tours
- * @copyright   2025 Your Name <your.email@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_teacher_tours
+ * @copyright 2025 Your Name <your.email@example.com>
+ * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+require_once '../../config.php';
 
-// Get parameters
-$id = required_param('id', PARAM_INT); // Block instance ID
+// Get parameters.
+$id = required_param('id', PARAM_INT); // Block instance ID.
 
-// Security checks
+// Security checks.
 require_login();
 
-// Get block instance and context
+// Get block instance and context.
 $blockinstance = $DB->get_record('block_instances', ['id' => $id], '*', MUST_EXIST);
 $context = context_block::instance($id);
 
-// Check capability
+// Check capability.
 require_capability('block/example:view', $context);
 
-// Set up page
+// Set up page.
 $PAGE->set_context($context);
 $PAGE->set_url('/blocks/example/view.php', ['id' => $id]);
 $PAGE->set_title(get_string('pluginname', 'block_teacher_tours'));
 $PAGE->set_heading(get_string('pluginname', 'block_teacher_tours'));
 
-// Output
+// Output.
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'block_teacher_tours'));
 
