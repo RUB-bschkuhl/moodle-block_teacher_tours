@@ -35,7 +35,7 @@ $string['existingtours'] = 'Existing Tours';
 $string['createnewtour'] = 'Create New Tour';
 $string['managetours'] = 'Manage Tours';
 $string['creatingtour'] = 'Creating New Tour';
-$string['tourinstructions'] = 'Click on course elements to add them as tour steps, then add descriptions for each step.';
+$string['tourinstructions'] = 'Click on course elements to add them as tour steps, then add text to each step.';
 $string['savetour'] = 'Save Tour';
 $string['enabled'] = 'Enabled';
 $string['disabled'] = 'Disabled';
@@ -60,6 +60,8 @@ $string['advanced'] = 'Advanced';
 $string['reflex'] = 'Auto-advance on click';
 $string['addstep'] = 'Add Step';
 $string['preview'] = 'Preview';
+$string['currentlyediting'] = 'Current target';
+$string['clearselection'] = 'Clear selection';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
 

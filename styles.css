@@ -1,7 +1,118 @@
+/* Tour creation highlighting */
 .module-highlight {
-  background-color: blue;
+  background-color: rgba(0, 123, 255, 0.3);
+  border: 1px solid #007bff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 1rem;
+}
+
+.module-highlight:hover {
+  background-color: rgba(0, 123, 255, 0.5);
+  transform: scale(1.02);
 }
 
 .section-highlight {
-  background-color: lightgreen;
+  background-color: rgba(40, 167, 69, 0.3);
+  border: 1px solid #28a745;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 1rem;
+}
+
+.section-highlight:hover {
+  background-color: rgba(40, 167, 69, 0.5);
+  transform: scale(1.02);
+}
+
+/* Tour Preview Styling */
+.tour-preview {
+  margin-bottom: 20px;
+  background-color: #fff;
+}
+
+.tour-step-preview {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.tour-step-preview:hover {
+  background-color: #e9ecef;
+  transform: translateX(2px);
+}
+
+.tour-step-preview:last-child {
+  margin-bottom: 0;
+}
+
+.tour-step-preview strong {
+  color: #495057;
+  margin-right: 8px;
+}
+
+/* Instructions Styling */
+.editor-instructions {
+  background-color: #e7f3ff;
+  border: 1px solid #b8daff;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #004085;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.editor-instructions::before {
+  content: "💡";
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* Current Step Indicator */
+.current-step-indicator .alert {
+  margin-bottom: 15px;
+  border-left: 4px solid #17a2b8;
+}
+
+/* Add Step Button Container */
+.add-step-container {
+  text-align: center;
+  padding: 20px;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  margin-top: 15px;
+}
+
+.add-step-container:hover {
+  border-color: #007bff;
+  background-color: #e7f3ff;
+}
+
+/* Text Editor Styling */
+.text-editor {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #dee2e6;
 }
