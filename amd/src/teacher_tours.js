@@ -90,6 +90,7 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Init the tourobject and starts the editor
         const init = function (courseid) {
+            init_styles();
             initializeEventBindings();
             resetTourObject(courseid);
         };
@@ -99,6 +100,23 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
             // Show the tour editor interface
             $('#tour-editor').show();
             highlightElements();
+        };
+
+        // Initialise style class for highlights
+        const init_styles = function () {
+            const colors = window.teachertoursColors;
+            const style = document.createElement('style');
+
+            style.textContent = `
+                .teacher-tours-section-highlight {
+                    background-color: ${colors.moduleHighlight};
+                }
+                .teacher-tours-module-highlight {
+                    background-color: ${colors.sectionHighlight};
+                }    
+            `;
+
+            document.head.appendChild(style);
         };
 
         // Store event handlers for specific removal
@@ -140,11 +158,11 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
             // Highlight the sections in light green
             // Highlight the mods in blue
             document.querySelectorAll('[id^="section-"]').forEach(section => {
-                section.classList.add('section-highlight');
+                section.classList.add('teacher-tours-section-highlight');
                 section.addEventListener('click', tourEventHandlers.sectionClick);
             });
             document.querySelectorAll('[id^="module-"]').forEach(mod => {
-                mod.classList.add('module-highlight');
+                mod.classList.add('teacher-tours-module-highlight');
                 mod.addEventListener('click', tourEventHandlers.moduleClick);
             });
         };
@@ -158,11 +176,11 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
         const removeHighlighting = function () {
             // Remove the highlighting from the elements and their specific event listeners
             document.querySelectorAll('[id^="section-"]').forEach(section => {
-                section.classList.remove('section-highlight');
+                section.classList.remove('teacher-tours-section-highlight');
                 section.removeEventListener('click', tourEventHandlers.sectionClick);
             });
             document.querySelectorAll('[id^="module-"]').forEach(mod => {
-                mod.classList.remove('module-highlight');
+                mod.classList.remove('teacher-tours-module-highlight');
                 mod.removeEventListener('click', tourEventHandlers.moduleClick);
             });
         };

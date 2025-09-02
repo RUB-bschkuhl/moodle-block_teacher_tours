@@ -63,3 +63,12 @@ $string['preview'] = 'Preview';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
 
+$string['settings_heading'] = 'Teacher Tour Settings';
+$string['module-highlight'] = 'Highlight Color for Modules';
+$string['module-highlight_desc'] = 'Color used to highlight modules via the CSS selector tool.';
+$string['section-highlight'] = 'Highlight Color for Sections';
+$string['section-highlight_desc'] = 'Color used to highlight sections via the CSS selector tool.';
+
+$string['teacher_tours'] = 'Example Block';
+$string['teacher_tours:addinstance'] = 'Add a new teacher tours block';
+$string['teacher_tours:view'] = 'View the Teacher Tours block.';
