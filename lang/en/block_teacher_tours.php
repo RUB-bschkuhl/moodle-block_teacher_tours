@@ -60,7 +60,7 @@ $string['advanced'] = 'Advanced';
 $string['reflex'] = 'Auto-advance on click';
 $string['addstep'] = 'Add Step';
 $string['preview'] = 'Preview';
-$string['currentlyediting'] = 'Currently editing';
+$string['currentlyediting'] = 'Current target';
 $string['clearselection'] = 'Clear selection';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';

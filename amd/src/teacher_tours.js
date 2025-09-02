@@ -20,8 +20,8 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
-define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
-    function ($, Ajax) { //, Ajax, Str, Templates
+define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
+    function ($, Ajax, Str) { //Templates
         /*  $step = new step();
          $step->set_tourid($this->tour->get_id());
          $step->set_title($title);
@@ -105,14 +105,28 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
         };
 
         // Show current step indicator
-        const showCurrentStepIndicator = function(elementText) {
+        const showCurrentStepIndicator = function (elementText) {
             $('#current-step-element').text(elementText);
             $('#current-step-indicator').show();
         };
 
+        // Show current step indicator
+        const showTourStepsPreview = function () {
+            $('.tour-preview').html('');
+            tourObject.steps.forEach((step, index) => {
+                $('.tour-preview')
+                    .append('<div class="tour-step-preview">Step ' + (index + 1) +
+                        '<strong> ' + step.targetvalue + ':</strong> ' + step.title + '</div>');
+            });
+        };
+
         // Hide current step indicator
-        const hideCurrentStepIndicator = function() {
+        const hideCurrentStepIndicator = function () {
             $('#current-step-indicator').hide();
+        };
+
+        const resetCurrentStepObject = function () {
+            currentStepObject = {};
         };
 
         // Store event handlers for specific removal
@@ -147,7 +161,9 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
                     reflex: 'false',
                 };
                 // Show current step indicator
-                showCurrentStepIndicator('Module: ' + mod.getAttribute('id'));
+                // check if direct child of mod has data-activityname
+                showCurrentStepIndicator('Module: ' + mod.childNodes[1].getAttribute('data-activityname'));
+
                 removeHighlighting();
                 startTextEditor();
             }
@@ -170,7 +186,18 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
         // The second step on creating a step for the tour is creating a text that should show when the step is active
         const startTextEditor = function () {
             $('#text-editor').show();
-            $('#text-editor').html(currentStepObject.content);
+            clearTextEditor();
+            $('#save-tour').hide();
+            $('#step-title').focus();
+        };
+
+        const clearTextEditor = function () {
+            $('#step-title').val('');
+            $('#step-content').val('');
+            // $('#step-placement').val('right');
+            // $('#step-backdrop').prop('checked', true);
+            // $('#step-orphan').prop('checked', false);
+            // $('#step-reflex').prop('checked', false);
         };
 
         const removeHighlighting = function () {
@@ -187,17 +214,26 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Send the tourObject to the endpoint
         const saveTour = function () {
-            // TODO: Implement save functionality on save button click
-            // TODO check if all required fields are filled
-            // TODO send the tourObject to the endpoint via ajax
-            console.log('Saving tour:', tourObject);
-            // call endpoint with ajax
-
+            $('#save-tour').prop('disabled', true).text('Saving...');
+            // Send the tourObject to the endpoint
             Ajax.call([{
                 methodname: 'block_teacher_tours_save_tour',
                 args: { tour: tourObject },
             }])[0].then(function (response) {
-                console.log("response", response, response.status);
+                //If ok reset the tourObject, if not show error
+                if (!response && !response.status === 'ok') {
+                    alert('Error saving tour: ' + (response.message || 'Unknown error'));
+                }
+                resetTourObject();
+                $('#tour-editor').hide();
+                $('#start-tour-creation').show();
+                $('#step-creation').show();
+                hideCurrentStepIndicator();
+                clearTextEditor();
+                removeHighlighting();
+                $('.tour-preview').html('');
+                Str.get_string('savetour', 'block_teacher_tours')
+                    .then(function (text) { $('#save-tour').prop('disabled', false).html('<i class="fa fa-save"></i> ' + text); });
             });
         };
 
@@ -221,7 +257,6 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Save the current step to the tour object
         const saveStep = function () {
-
             // Get values from the form
             const title = $('#step-title').val();
             const content = $('#step-content').val();
@@ -241,14 +276,6 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
             // Add the step to the tour
             addStep(currentStepObject);
-
-            // Hide the text editor
-            $('#text-editor').hide();
-            $('#text-editor').html('');
-
-            // Reset for next step
-            currentStepObject = {};
-            $('#step-creation').show();
         };
 
         // Initialize event bindings
@@ -257,12 +284,6 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
             $(document).on('click', '#start-tour-creation', function (e) {
                 e.preventDefault();
                 startEditor();
-            });
-
-            // Bind click event to cancel tour creation button
-            $(document).on('click', '#cancel-tour-creation', function (e) {
-                e.preventDefault();
-                $('#tour-editor').hide();
             });
 
             // Bind click event to save tour button
@@ -275,21 +296,24 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
             $(document).on('click', '#save-step', function (e) {
                 e.preventDefault();
                 saveStep();
+                // Hide the text editor
+                $('#text-editor').hide();
+                $('#save-tour').show();
+                // Reset for next step
+                showTourStepsPreview();
+                hideCurrentStepIndicator();
+                resetCurrentStepObject();
+                // Restart the editor to pick the next element
+                startEditor();
             });
 
             // Bind click event to cancel step edit button
             $(document).on('click', '#cancel-step-edit', function (e) {
                 e.preventDefault();
-                $('#text-editor').hide();
                 hideCurrentStepIndicator();
-            });
-
-            // Bind click event to clear selection button
-            $(document).on('click', '#clear-selection', function (e) {
-                e.preventDefault();
-                hideCurrentStepIndicator();
-                currentStepObject = {};
+                resetCurrentStepObject();
                 $('#text-editor').hide();
+                startEditor();
             });
 
             // Bind click event to cancel tour creation button
@@ -298,10 +322,11 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
                 $('#tour-editor').hide();
                 $('#start-tour-creation').show();
                 hideCurrentStepIndicator();
-                currentStepObject = {};
+                resetTourObject();
+                $('.tour-preview').html('');
             });
 
-            $(document).on('click', '#step-creation', function() {
+            $(document).on('click', '#step-creation', function () {
                 startEditor();
             });
         };

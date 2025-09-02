@@ -57,18 +57,18 @@
         <div class="editor-header">
             <h5>{{#str}}creatingtour, block_teacher_tours{{/str}}</h5>
         </div>
+
+        <div class="tour-preview">
+        <!-- Preview of the tour steps as they is being added -->
+        </div>
         
         <div class="editor-content">
             <p class="editor-instructions">{{#str}}tourinstructions, block_teacher_tours{{/str}}</p>
-            
             <!-- Current step indicator -->
             <div id="current-step-indicator" class="current-step-indicator" style="display: none;">
                 <div class="alert alert-info">
-                    <strong>{{#str}}currentlyediting, block_teacher_tours{{/str}}:</strong>
+                    <strong>{{#str}}currentlyediting, block_teacher_tours{{/str}}:</strong><br />
                     <span id="current-step-element"></span>
-                    <button id="clear-selection" class="btn btn-sm btn-outline-secondary ms-2">
-                        {{#str}}clearselection, block_teacher_tours{{/str}}
-                    </button>
                 </div>
             </div>
             
@@ -87,14 +87,11 @@
         <div class="text-editor-header">
             <h5>{{#str}}editstep, block_teacher_tours{{/str}}</h5>
         </div>
-        
-                <div class="text-editor-content">
- 
+        <div class="text-editor-content">
             <div class="mb-3">
                 <label for="step-title" class="form-label">{{#str}}steptitle, block_teacher_tours{{/str}}</label>
                 <input type="text" id="step-title" class="form-control" placeholder="{{#str}}entertitle, block_teacher_tours{{/str}}">
             </div>
-            
             <div class="mb-3">
                 <label for="step-content" class="form-label">{{#str}}stepcontent, block_teacher_tours{{/str}}</label>
                 <textarea id="step-content" class="form-control" rows="4" placeholder="{{#str}}entercontent, block_teacher_tours{{/str}}"></textarea>
@@ -109,12 +106,10 @@
                 {{#str}}cancel, moodle{{/str}}
             </button>
         </div>
-
     </div>
-
-        <div class="editor-actions">
-            <button id="save-tour" class="btn btn-success">
-                <i class="fa fa-save"></i> {{#str}}savetour, block_teacher_tours{{/str}}
-            </button>
-        </div>
+    <div class="editor-actions">
+        <button id="save-tour" class="btn btn-success" style="display: none;">
+            <i class="fa fa-save"></i> {{#str}}savetour, block_teacher_tours{{/str}}
+        </button>
+    </div>
 </div>
