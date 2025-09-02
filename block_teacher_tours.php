@@ -68,6 +68,7 @@ class block_teacher_tours extends block_base
         }
 
         // Main block content
+        // TODO add tours to display
         $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', []);
 
         return $this->content;
@@ -92,7 +93,7 @@ class block_teacher_tours extends block_base
     public function get_all_tours_for_course($courseid)
     {
         global $DB;
-        $tours = $DB->get_records('tool_user_tours', ['pathname' => $courseid]);
+        $tours = $DB->get_records('tool_usertours_tours', ['pathmatch' => '/course/view.php?id=' . $courseid]);
         return $tours;
     }
 

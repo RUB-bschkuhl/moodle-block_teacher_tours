@@ -20,8 +20,8 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
-define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
-    function ($) { //, Ajax, Str, Templates
+define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
+    function ($, Ajax) { //, Ajax, Str, Templates
         /*  $step = new step();
          $step->set_tourid($this->tour->get_id());
          $step->set_title($title);
@@ -103,13 +103,13 @@ define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Store event handlers for specific removal
         const tourEventHandlers = {
-            sectionClick: function(e) {
+            sectionClick: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const section = e.currentTarget;
                 currentStepObject = {
                     targettype: '2',
-                    targetvalue: section.getAttribute('id'),
+                    targetvalue: '#' + section.getAttribute('id'),
                     placement: 'right',
                     orphan: 'false',
                     backdrop: 'true',
@@ -118,13 +118,13 @@ define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
                 removeHighlighting();
                 startTextEditor();
             },
-            moduleClick: function(e) {
+            moduleClick: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const mod = e.currentTarget;
                 currentStepObject = {
                     targettype: '2',
-                    targetvalue: mod.getAttribute('id'),
+                    targetvalue: '#' + mod.getAttribute('id'),
                     placement: 'right',
                     orphan: 'false',
                     backdrop: 'true',
@@ -151,7 +151,6 @@ define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // The second step on creating a step for the tour is creating a text that should show when the step is active
         const startTextEditor = function () {
-            // TODO: Implement text editor functionality this should show a textarea with the current step object and a button to save the step
             $('#text-editor').show();
             $('#text-editor').html(currentStepObject.content);
         };
@@ -168,35 +167,32 @@ define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
             });
         };
 
-        const saveStep = function () {
-            // TODO: bind save event to the button in the text editor
-            // TODO add currentStepObject to the tourObject.steps array
-            addStep(currentStepObject);
-            $('#text-editor').hide();
-            $('#text-editor').html('');
-            currentStepObject = {};
-           // highlightElements();
-        };
-
         // Send the tourObject to the endpoint
         const saveTour = function () {
             // TODO: Implement save functionality on save button click
             // TODO check if all required fields are filled
             // TODO send the tourObject to the endpoint via ajax
             console.log('Saving tour:', tourObject);
+            // call endpoint with ajax
+
+            Ajax.call([{
+                methodname: 'block_teacher_tours_save_tour',
+                args: { tour: tourObject },
+            }])[0].then(function (response) {
+                console.log("response", response, response.status);
+            });
         };
 
         // Reset the tourObject
         const resetTourObject = function (courseid) {
             tourObject = {
                 steps: [],
-                name: '',
-                description: '',
-                pathmatch: '',
+                name: 'tour for course ' + courseid,
+                description: 'A tour for course ' + courseid,
+                pathmatch: '/course/view.php?id=' + courseid,
                 enabled: '',
                 filter_values: '',
                 sortorder: '',
-                courseid: courseid
             };
         };
 
@@ -207,27 +203,30 @@ define(['jquery'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Save the current step to the tour object
         const saveStep = function () {
+
             // Get values from the form
             const title = $('#step-title').val();
             const content = $('#step-content').val();
-            const placement = $('#step-placement').val();
-            const backdrop = $('#step-backdrop').prop('checked') ? 'true' : 'false';
-            const orphan = $('#step-orphan').prop('checked') ? 'true' : 'false';
-            const reflex = $('#step-reflex').prop('checked') ? 'true' : 'false';
+            // TODO maybe
+            // const placement = $('#step-placement').val();
+            // const backdrop = $('#step-backdrop').prop('checked') ? 'true' : 'false';
+            // const orphan = $('#step-orphan').prop('checked') ? 'true' : 'false';
+            // const reflex = $('#step-reflex').prop('checked') ? 'true' : 'false';
 
             // Update the current step object with form values
             currentStepObject.title = title;
             currentStepObject.content = content;
-            currentStepObject.placement = placement;
-            currentStepObject.backdrop = backdrop;
-            currentStepObject.orphan = orphan;
-            currentStepObject.reflex = reflex;
+            // currentStepObject.placement = placement;
+            // currentStepObject.backdrop = backdrop;
+            // currentStepObject.orphan = orphan;
+            // currentStepObject.reflex = reflex;
 
             // Add the step to the tour
             addStep(currentStepObject);
 
             // Hide the text editor
             $('#text-editor').hide();
+            $('#text-editor').html('');
 
             // Reset for next step
             currentStepObject = {};
