@@ -62,3 +62,4 @@ $string['addstep'] = 'Add Step';
 $string['preview'] = 'Preview';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
+

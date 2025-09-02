@@ -62,3 +62,4 @@ $string['addstep'] = 'Schritt hinzufügen';
 $string['preview'] = 'Vorschau';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
+

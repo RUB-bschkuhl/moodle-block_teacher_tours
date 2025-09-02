@@ -110,6 +110,7 @@ class block_teacher_tours extends block_base
         if ($courseid != SITEID) {
             $PAGE->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid]);
         }
+
     }
 
     /**
