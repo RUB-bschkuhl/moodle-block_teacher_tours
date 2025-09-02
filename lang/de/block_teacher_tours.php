@@ -25,10 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Teacher Tours';
-$string['example'] = 'Beispiel Block';
-$string['example:addinstance'] = 'Einen neuen Beispiel Block hinzufügen';
-$string['example:myaddinstance'] = 'Einen neuen Beispiel Block zum Dashboard hinzufügen';
-$string['example:view'] = 'Beispiel Block Inhalt anzeigen';
-$string['blockcontent'] = 'Dies ist der Inhalt Ihres Beispiel Blocks. Sie können diese Nachricht anpassen.';
-$string['viewmore'] = 'Mehr anzeigen';
-$string['privacy:metadata'] = 'Der Beispiel Block speichert keine persönlichen Daten.';
+$string['privacy:metadata'] = 'Der Teacher Tours Block speichert keine persönlichen Daten.';
+
+$string['teacher_tours'] = 'Teacher Tours';
+$string['teacher_tours:addinstance'] = 'Einen neuen Teacher Tours Block hinzufügen.';
+$string['teacher_tours:view'] = 'Den Teacher Tours Block sehen.';

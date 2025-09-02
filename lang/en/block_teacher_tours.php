@@ -24,11 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Example Block';
-$string['example'] = 'Example Block';
-$string['example:addinstance'] = 'Add a new Example block';
-$string['example:myaddinstance'] = 'Add a new Example block to Dashboard';
-$string['example:view'] = 'View Example block content';
-$string['blockcontent'] = 'This is the content of your example block. You can customize this message.';
-$string['viewmore'] = 'View more';
-$string['privacy:metadata'] = 'The Example block does not store any personal data.';
+$string['pluginname'] = 'Teacher Tours';
+$string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
+
+$string['teacher_tours'] = 'Example Block';
+$string['teacher_tours:addinstance'] = 'Add a new teacher tours block';
+$string['teacher_tours:view'] = 'View the Teacher Tours block.';

@@ -18,11 +18,9 @@
  * Block example main class.
  *
  * @package   block_teacher_tours
- * @copyright 2025 Your Name <your.email@example.com>
+ * @copyright 2025 Christin Wolters <christian.wolters@uni-luebeck.de>
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Example block class
@@ -35,8 +33,6 @@ class block_teacher_tours extends block_base
      */
     public function init()
     {
-    public function init()
-    {
         $this->title = get_string('pluginname', 'block_teacher_tours');
     }
 
@@ -45,8 +41,6 @@ class block_teacher_tours extends block_base
      *
      * @return stdClass The block content
      */
-    public function get_content()
-    {
     public function get_content()
     {
         if ($this->content !== null) {
@@ -85,8 +79,6 @@ class block_teacher_tours extends block_base
      */
     public function instance_allow_multiple()
     {
-    public function instance_allow_multiple()
-    {
         return true;
     }
 
@@ -111,8 +103,7 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function has_config()
-    {
+    public function has_config() {
         return true;
     }
 
@@ -123,13 +114,8 @@ class block_teacher_tours extends block_base
      */
     public function applicable_formats()
     {
-    public function applicable_formats()
-    {
         return [
             'course-view' => true,
-            'site' => true,
-            'mod' => false,
-            'my' => true
         ];
     }
 
@@ -138,8 +124,6 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function instance_allow_config()
-    {
     public function instance_allow_config()
     {
         return true;
