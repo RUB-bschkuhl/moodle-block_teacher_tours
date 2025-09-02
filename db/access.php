@@ -17,41 +17,29 @@
 /**
  * Plugin capabilities are defined here.
  *
- * @package     block_teacher_tours
- * @copyright   2025 Your Name <your.email@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_teacher_tours
+ * @copyright 2025 Your Name <your.email@example.com>
+ * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'block/example:addinstance' => [
+    'block/teacher_tours:addinstance' => [
         'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager' => CAP_ALLOW,
         ],
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
+        'clonepermissionsfrom' => 'moodle/site:manageblocks',
     ],
 
-    'block/example:myaddinstance' => [
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [
-            'user' => CAP_ALLOW
-        ],
-        'clonepermissionsfrom' => 'moodle/my:manageblocks'
-    ],
-
-    'block/example:view' => [
+    'block/teacher_tours:view' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => [
-            'guest' => CAP_ALLOW,
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
         ],

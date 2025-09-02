@@ -17,18 +17,16 @@
 /**
  * German language strings for block_teacher_tours.
  *
- * @package     block_teacher_tours
- * @copyright   2025 Your Name <your.email@example.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_teacher_tours
+ * @copyright 2025 Your Name <your.email@example.com>
+ * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Beispiel Block';
-$string['example'] = 'Beispiel Block';
-$string['example:addinstance'] = 'Einen neuen Beispiel Block hinzufügen';
-$string['example:myaddinstance'] = 'Einen neuen Beispiel Block zum Dashboard hinzufügen';
-$string['example:view'] = 'Beispiel Block Inhalt anzeigen';
-$string['blockcontent'] = 'Dies ist der Inhalt Ihres Beispiel Blocks. Sie können diese Nachricht anpassen.';
-$string['viewmore'] = 'Mehr anzeigen';
-$string['privacy:metadata'] = 'Der Beispiel Block speichert keine persönlichen Daten.';
+$string['pluginname'] = 'Teacher Tours';
+$string['privacy:metadata'] = 'Der Teacher Tours Block speichert keine persönlichen Daten.';
+
+$string['teacher_tours'] = 'Teacher Tours';
+$string['teacher_tours:addinstance'] = 'Einen neuen Teacher Tours Block hinzufügen.';
+$string['teacher_tours:view'] = 'Den Teacher Tours Block sehen.';
