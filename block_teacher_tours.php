@@ -25,12 +25,14 @@
 /**
  * Example block class
  */
-class block_teacher_tours extends block_base {
+class block_teacher_tours extends block_base
+{
 
     /**
      * Initialize the block
      */
-    public function init() {
+    public function init()
+    {
         $this->title = get_string('pluginname', 'block_teacher_tours');
     }
 
@@ -39,7 +41,10 @@ class block_teacher_tours extends block_base {
      *
      * @return stdClass The block content
      */
-    public function get_content() {
+    public function get_content()
+    {
+        global $OUTPUT;
+
         if ($this->content !== null) {
             return $this->content;
         }
@@ -50,9 +55,21 @@ class block_teacher_tours extends block_base {
 
         // Check if user has permission to view this block.
         $context = context_block::instance($this->instance->id);
+
+        //TODO get all tours for the current course
+        $tours = $this->get_all_tours_for_course($this->page->course->id);
+
         if (has_capability('block/teacher_tours:view', $context)) {
             $this->content->text = '[Content visible to teachers]';
         }
+
+        if (!has_capability('block/teacher_tours:view', $context)) {
+            return $this->content;
+        }
+
+        // Main block content
+        // TODO add tours to display
+        $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', []);
 
         return $this->content;
     }
@@ -62,8 +79,38 @@ class block_teacher_tours extends block_base {
      *
      * @return bool
      */
-    public function instance_allow_multiple() {
+    public function instance_allow_multiple()
+    {
         return false;
+    }
+
+    /**
+     * Get all tours for the current course
+     *
+     * @param int $courseid
+     * @return array
+     */
+    public function get_all_tours_for_course($courseid)
+    {
+        global $DB;
+        $tours = $DB->get_records('tool_usertours_tours', ['pathmatch' => '/course/view.php?id=' . $courseid]);
+        return $tours;
+    }
+
+    /**
+     * Add required JavaScript.
+     *
+     * @return void
+     */
+    public function get_required_javascript()
+    {
+        global $PAGE;
+
+        $courseid = $this->page->course->id;
+        if ($courseid != SITEID) {
+            $PAGE->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid]);
+        }
+
     }
 
     /**
@@ -71,7 +118,8 @@ class block_teacher_tours extends block_base {
      *
      * @return bool
      */
-    public function has_config() {
+    public function has_config()
+    {
         return true;
     }
 
@@ -80,7 +128,8 @@ class block_teacher_tours extends block_base {
      *
      * @return array
      */
-    public function applicable_formats() {
+    public function applicable_formats()
+    {
         return [
             'course-view' => true,
         ];
@@ -91,7 +140,8 @@ class block_teacher_tours extends block_base {
      *
      * @return bool
      */
-    public function instance_allow_config() {
+    public function instance_allow_config()
+    {
         return true;
     }
 }

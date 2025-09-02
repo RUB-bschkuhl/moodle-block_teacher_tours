@@ -24,9 +24,42 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Teacher Tours';
-$string['privacy:metadata'] = 'Der Teacher Tours Block speichert keine persönlichen Daten.';
+$string['pluginname'] = 'Lehrer Touren';
+$string['teacher_tours:addinstance'] = 'Einen neuen Lehrer Touren Block hinzufügen';
+$string['teacher_tours:myaddinstance'] = 'Einen neuen Lehrer Touren Block zum Dashboard hinzufügen';
+$string['teacher_tours:view'] = 'Den Lehrer Touren Block anzeigen';
 
-$string['teacher_tours'] = 'Teacher Tours';
-$string['teacher_tours:addinstance'] = 'Einen neuen Teacher Tours Block hinzufügen.';
-$string['teacher_tours:view'] = 'Den Teacher Tours Block sehen.';
+// Template strings
+$string['blockdescription'] = 'Erstellen Sie geführte Touren für Ihren Kurs, um Studenten bei der Navigation und dem Verständnis der Kursinhalte zu helfen.';
+$string['existingtours'] = 'Vorhandene Touren';
+$string['createnewtour'] = 'Neue Tour erstellen';
+$string['managetours'] = 'Touren verwalten';
+$string['creatingtour'] = 'Neue Tour erstellen';
+$string['tourinstructions'] = 'Klicken Sie auf Kurselemente, um sie als Tour-Schritte hinzuzufügen, und fügen Sie dann Beschreibungen für jeden Schritt hinzu.';
+$string['savetour'] = 'Tour speichern';
+$string['enabled'] = 'Aktiviert';
+$string['disabled'] = 'Deaktiviert';
+
+// Text editor strings
+$string['editstep'] = 'Tour-Schritt bearbeiten';
+$string['steptitle'] = 'Schritt-Titel';
+$string['stepcontent'] = 'Schritt-Inhalt';
+$string['entertitle'] = 'Geben Sie einen Titel für diesen Schritt ein';
+$string['entercontent'] = 'Geben Sie den Inhalt ein, der in diesem Schritt angezeigt wird';
+$string['targettype'] = 'Zieltyp';
+$string['targetvalue'] = 'Zielwert';
+$string['placement'] = 'Positionierung';
+$string['placementtop'] = 'Oben';
+$string['placementbottom'] = 'Unten';
+$string['placementleft'] = 'Links';
+$string['placementright'] = 'Rechts';
+$string['options'] = 'Optionen';
+$string['backdrop'] = 'Hintergrund anzeigen';
+$string['orphan'] = 'Auch anzeigen wenn Ziel nicht gefunden';
+$string['advanced'] = 'Erweitert';
+$string['reflex'] = 'Automatisch weiter bei Klick';
+$string['addstep'] = 'Schritt hinzufügen';
+$string['preview'] = 'Vorschau';
+
+$string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
+

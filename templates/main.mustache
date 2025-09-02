@@ -1,0 +1,105 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_teacher_tours/main
+}}
+
+<div class="teacher-tours-block">
+    <div class="tour-header">
+    </div>
+    
+    <div class="tour-content">
+        {{#existing_tours}}
+        <div class="existing-tours">
+            <h5>{{#str}}existingtours, block_teacher_tours{{/str}}</h5>
+            <ul class="tour-list">
+                {{#tours}}
+                <li class="tour-item">
+                    <span class="tour-name">{{name}}</span>
+                    <span class="tour-status {{#enabled}}enabled{{/enabled}}{{^enabled}}disabled{{/enabled}}">
+                        {{#enabled}}{{#str}}enabled, block_teacher_tours{{/str}}{{/enabled}}
+                        {{^enabled}}{{#str}}disabled, block_teacher_tours{{/str}}{{/enabled}}
+                    </span>
+                </li>
+                {{/tours}}
+            </ul>
+        </div>
+        {{/existing_tours}}
+        
+        <div class="tour-actions">
+            <button id="start-tour-creation" class="btn btn-primary tour-create-btn">
+                <i class="fa fa-plus"></i> {{#str}}createnewtour, block_teacher_tours{{/str}}
+            </button>
+            
+            {{#existing_tours}}
+            <button id="manage-tours" class="btn btn-secondary tour-manage-btn">
+                <i class="fa fa-cog"></i> {{#str}}managetours, block_teacher_tours{{/str}}
+            </button>
+            {{/existing_tours}}
+        </div>
+    </div>
+    
+    <div class="tour-editor" id="tour-editor" style="display: none;">
+        <div class="editor-header">
+            <h5>{{#str}}creatingtour, block_teacher_tours{{/str}}</h5>
+            <button id="cancel-tour-creation" class="btn btn-sm btn-outline-secondary">
+                {{#str}}cancel, moodle{{/str}}
+            </button>
+        </div>
+        
+        <div class="editor-content">
+            <p class="editor-instructions">{{#str}}tourinstructions, block_teacher_tours{{/str}}</p>
+            <div id="tour-steps-container">
+                <!-- Steps will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div class="editor-actions">
+            <button id="save-tour" class="btn btn-success">
+                <i class="fa fa-save"></i> {{#str}}savetour, block_teacher_tours{{/str}}
+            </button>
+        </div>
+    </div>
+    
+    <div class="text-editor" id="text-editor" style="display: none;">
+        <div class="text-editor-header">
+            <h5>{{#str}}editstep, block_teacher_tours{{/str}}</h5>
+            <button id="cancel-step-edit" class="btn btn-sm btn-outline-secondary">
+                {{#str}}cancel, moodle{{/str}}
+            </button>
+        </div>
+        
+                <div class="text-editor-content">
+ 
+            <div class="mb-3">
+                <label for="step-title" class="form-label">{{#str}}steptitle, block_teacher_tours{{/str}}</label>
+                <input type="text" id="step-title" class="form-control" placeholder="{{#str}}entertitle, block_teacher_tours{{/str}}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="step-content" class="form-label">{{#str}}stepcontent, block_teacher_tours{{/str}}</label>
+                <textarea id="step-content" class="form-control" rows="4" placeholder="{{#str}}entercontent, block_teacher_tours{{/str}}"></textarea>
+            </div>
+        </div>
+        
+        <div class="text-editor-actions">
+            <button id="save-step" class="btn btn-primary">
+                <i class="fa fa-plus"></i> {{#str}}addstep, block_teacher_tours{{/str}}
+            </button>
+        </div>
+    </div>
+</div>
