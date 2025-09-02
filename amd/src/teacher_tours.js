@@ -116,8 +116,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             tourObject.steps.forEach((step, index) => {
                 $('.tour-preview')
                     .append('<div class="tour-step-preview">Step ' + (index + 1) +
-                        '<strong> ' + step.targetvalue + ':</strong> ' + step.title + '</div>');
+                        ' <strong> ' + step.targetvalue + ':</strong> ' + step.title + '</div>');
             });
+            $('.tour-preview').show();
         };
 
         // Hide current step indicator
@@ -136,7 +137,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 e.stopPropagation();
                 const section = e.currentTarget;
                 currentStepObject = {
-                    targettype: '2',
+                    targettype: '0',
                     targetvalue: '#' + section.getAttribute('id'),
                     placement: 'right',
                     orphan: 'false',
@@ -153,7 +154,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 e.stopPropagation();
                 const mod = e.currentTarget;
                 currentStepObject = {
-                    targettype: '2',
+                    targettype: '0',
                     targetvalue: '#' + mod.getAttribute('id'),
                     placement: 'right',
                     orphan: 'false',
@@ -232,6 +233,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 clearTextEditor();
                 removeHighlighting();
                 $('.tour-preview').html('');
+                $('.tour-preview').hide();
                 Str.get_string('savetour', 'block_teacher_tours')
                     .then(function (text) { $('#save-tour').prop('disabled', false).html('<i class="fa fa-save"></i> ' + text); });
             });
@@ -324,6 +326,8 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 hideCurrentStepIndicator();
                 resetTourObject();
                 $('.tour-preview').html('');
+                $('.tour-preview').hide();
+
             });
 
             $(document).on('click', '#step-creation', function () {
