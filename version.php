@@ -25,8 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_teacher_tours';
-$plugin->release = '1.0.0';
-$plugin->version = 2025010200;
-$plugin->requires = 2023100900; // Moodle 4.3+
-$plugin->maturity = MATURITY_STABLE;
-$plugin->supported = [500]; // Moodle 4.3, 4.4, 4.5
+$plugin->version = 2025090200;
+$plugin->requires = 2025041400; // Moodle 5.0 .
+$plugin->maturity = MATURITY_ALPHA;
+$plugin->supported = [500]; // Moodle 5.0 .
