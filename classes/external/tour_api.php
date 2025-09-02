@@ -109,7 +109,8 @@ class tour_api extends external_api {
         $toursave->name = $tourdata['name'];
         $toursave->description = $tourdata['description'];
         $toursave->pathmatch = $tourdata['pathmatch'];
-        $toursave->enabled = ($tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
+        // Enable by default if not specified or empty
+        $toursave->enabled = (empty($tourdata['enabled']) || $tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
         $toursave->sortorder = is_numeric($tourdata['sortorder']) ? (int)$tourdata['sortorder'] : 0;
         
         // Prepare configdata
@@ -137,8 +138,9 @@ class tour_api extends external_api {
             $stepsave->title = $step['title'] ?? '';
             $stepsave->content = $step['content'] ?? '';
             
-            // Convert targettype from string to int
-            $stepsave->targettype = is_numeric($step['targettype']) ? (int)$step['targettype'] : 0;
+            // Convert targettype from string to int (frontend sends "2" but we want 0 for SELECTOR)
+            // targettype: 0 = SELECTOR, 1 = BLOCK, 2 = UNATTACHED
+            $stepsave->targettype = 0; // Always use 0 for CSS selectors
             
             // Ensure targetvalue has proper format
             $targetvalue = $step['targetvalue'] ?? '';
