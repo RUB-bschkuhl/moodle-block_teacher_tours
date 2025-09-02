@@ -50,7 +50,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function save_tour_parameters() {
+    public static function save_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID (0 for new)', VALUE_DEFAULT, 0),
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -64,16 +64,16 @@ class tour_api extends external_api {
     /**
      * Save a tour (create or update).
      *
-     * @param int $tourid Tour ID (0 for new)
-     * @param int $courseid Course ID
-     * @param string $name Tour name
+     * @param int $tourid         Tour ID (0 for new)
+     * @param int $courseid       Course ID
+     * @param string $name        Tour name
      * @param string $description Tour description
-     * @param string $steps JSON encoded steps
-     * @param bool $enabled Enabled status
+     * @param string $steps       JSON encoded steps
+     * @param bool $enabled       Enabled status
+     *
      * @return array Result
      */
-    public static function save_tour($tourid, $courseid, $name, $description, $steps, $enabled) {
-        global $DB;
+    public static function save_tour(int $tourid, int $courseid, string $name, string $description, string $steps, bool $enabled): array {
 
         $params = self::validate_parameters(self::save_tour_parameters(), [
             'tourid' => $tourid,
@@ -134,7 +134,7 @@ class tour_api extends external_api {
      *
      * @return external_single_structure
      */
-    public static function save_tour_returns() {
+    public static function save_tour_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'tourid' => new external_value(PARAM_INT, 'Tour ID')
@@ -146,7 +146,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function get_tour_parameters() {
+    public static function get_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID')
         ]);
@@ -156,10 +156,10 @@ class tour_api extends external_api {
      * Get a tour by ID.
      *
      * @param int $tourid Tour ID
+     *
      * @return array Tour data
      */
-    public static function get_tour($tourid) {
-        global $DB;
+    public static function get_tour(int $tourid): array {
 
         $params = self::validate_parameters(self::get_tour_parameters(), [
             'tourid' => $tourid
@@ -193,7 +193,7 @@ class tour_api extends external_api {
      *
      * @return external_single_structure
      */
-    public static function get_tour_returns() {
+    public static function get_tour_returns(): external_single_structure {
         return new external_single_structure([
             'id' => new external_value(PARAM_INT, 'Tour ID'),
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -209,7 +209,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function get_course_tours_parameters() {
+    public static function get_course_tours_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
             'enabledonly' => new external_value(PARAM_BOOL, 'Only return enabled tours', VALUE_DEFAULT, false)
@@ -219,12 +219,12 @@ class tour_api extends external_api {
     /**
      * Get all tours for a course.
      *
-     * @param int $courseid Course ID
+     * @param int $courseid     Course ID
      * @param bool $enabledonly Only return enabled tours
+     *
      * @return array Tours data
      */
-    public static function get_course_tours($courseid, $enabledonly = false) {
-        global $DB;
+    public static function get_course_tours(int $courseid, bool $enabledonly = false): array {
 
         $params = self::validate_parameters(self::get_course_tours_parameters(), [
             'courseid' => $courseid,
@@ -259,7 +259,7 @@ class tour_api extends external_api {
      *
      * @return external_multiple_structure
      */
-    public static function get_course_tours_returns() {
+    public static function get_course_tours_returns(): external_multiple_structure {
         return new external_multiple_structure(
             new external_single_structure([
                 'id' => new external_value(PARAM_INT, 'Tour ID'),
@@ -277,7 +277,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function delete_tour_parameters() {
+    public static function delete_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID')
         ]);
@@ -287,9 +287,10 @@ class tour_api extends external_api {
      * Delete a tour.
      *
      * @param int $tourid Tour ID
+     *
      * @return array Result
      */
-    public static function delete_tour($tourid) {
+    public static function delete_tour(int $tourid): array {
         global $DB;
 
         $params = self::validate_parameters(self::delete_tour_parameters(), [
@@ -319,7 +320,7 @@ class tour_api extends external_api {
      *
      * @return external_single_structure
      */
-    public static function delete_tour_returns() {
+    public static function delete_tour_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status')
         ]);
@@ -330,7 +331,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function update_steps_parameters() {
+    public static function update_steps_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID'),
             'steps' => new external_value(PARAM_RAW, 'JSON encoded steps array')
@@ -340,12 +341,12 @@ class tour_api extends external_api {
     /**
      * Update tour steps.
      *
-     * @param int $tourid Tour ID
+     * @param int $tourid   Tour ID
      * @param string $steps JSON encoded steps
+     *
      * @return array Result
      */
-    public static function update_steps($tourid, $steps) {
-        global $DB;
+    public static function update_steps(int $tourid, string $steps): array {
 
         $params = self::validate_parameters(self::update_steps_parameters(), [
             'tourid' => $tourid,
@@ -384,7 +385,7 @@ class tour_api extends external_api {
      *
      * @return external_single_structure
      */
-    public static function update_steps_returns() {
+    public static function update_steps_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status')
         ]);
@@ -395,7 +396,7 @@ class tour_api extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function start_tour_parameters() {
+    public static function start_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID')
         ]);
@@ -405,10 +406,10 @@ class tour_api extends external_api {
      * Start a tour for the current user.
      *
      * @param int $tourid Tour ID
+     *
      * @return array Tour data with rendered steps
      */
-    public static function start_tour($tourid) {
-        global $DB, $USER;
+    public static function start_tour(int $tourid): array {
 
         $params = self::validate_parameters(self::start_tour_parameters(), [
             'tourid' => $tourid
@@ -445,7 +446,7 @@ class tour_api extends external_api {
      *
      * @return external_single_structure
      */
-    public static function start_tour_returns() {
+    public static function start_tour_returns(): external_single_structure {
         return new external_single_structure([
             'id' => new external_value(PARAM_INT, 'Tour ID'),
             'name' => new external_value(PARAM_TEXT, 'Tour name'),
