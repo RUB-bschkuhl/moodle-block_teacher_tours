@@ -27,10 +27,14 @@
  */
 class block_teacher_tours extends block_base
 {
+class block_teacher_tours extends block_base
+{
 
     /**
      * Initialize the block
      */
+    public function init()
+    {
     public function init()
     {
         $this->title = get_string('pluginname', 'block_teacher_tours');
@@ -43,6 +47,8 @@ class block_teacher_tours extends block_base
      */
     public function get_content()
     {
+    public function get_content()
+    {
         if ($this->content !== null) {
             return $this->content;
         }
@@ -53,20 +59,18 @@ class block_teacher_tours extends block_base
 
         // Check if user has permission to view this block.
         $context = context_block::instance($this->instance->id);
+        if (has_capability('block/teacher_tours:view', $context)) {
+            $this->content->text = '[Content visible to teachers]';
+        }
+
         if (!has_capability('block/teacher_tours:view', $context)) {
             return $this->content;
         }
 
-        // Main block content.
+        // Main block content
         $this->content->text = html_writer::div(
             get_string('blockcontent', 'block_teacher_tours'),
             'block-example-content'
-        );
-
-        // Optional footer.
-        $this->content->footer = html_writer::link(
-            new moodle_url('/blocks/example/view.php', ['id' => $this->instance->id]),
-            get_string('viewmore', 'block_teacher_tours')
         );
 
         return $this->content;
@@ -77,9 +81,8 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function instance_allow_multiple()
-    {
-        return true;
+    public function instance_allow_multiple() {
+        return false;
     }
 
 
@@ -103,7 +106,8 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function has_config() {
+    public function has_config()
+    {
         return true;
     }
 
