@@ -96,9 +96,23 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
         // Starts the picker at first
         const startEditor = function () {
+            // Hide the create new tour button when editing
+            $('#start-tour-creation').hide();
+            $('#step-creation').hide();
             // Show the tour editor interface
             $('#tour-editor').show();
             highlightElements();
+        };
+
+        // Show current step indicator
+        const showCurrentStepIndicator = function(elementText) {
+            $('#current-step-element').text(elementText);
+            $('#current-step-indicator').show();
+        };
+
+        // Hide current step indicator
+        const hideCurrentStepIndicator = function() {
+            $('#current-step-indicator').hide();
         };
 
         // Store event handlers for specific removal
@@ -115,6 +129,8 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
                     backdrop: 'true',
                     reflex: 'false',
                 };
+                // Show current step indicator
+                showCurrentStepIndicator('Section: ' + section.getAttribute('data-sectionname'));
                 removeHighlighting();
                 startTextEditor();
             },
@@ -130,6 +146,8 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
                     backdrop: 'true',
                     reflex: 'false',
                 };
+                // Show current step indicator
+                showCurrentStepIndicator('Module: ' + mod.getAttribute('id'));
                 removeHighlighting();
                 startTextEditor();
             }
@@ -230,9 +248,7 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
 
             // Reset for next step
             currentStepObject = {};
-
-            // Show success message or update UI
-            console.log('Step saved to tour:', tourObject);
+            $('#step-creation').show();
         };
 
         // Initialize event bindings
@@ -265,6 +281,28 @@ define(['jquery', 'core/ajax'], //, 'core/ajax', 'core/str', 'core/templates'
             $(document).on('click', '#cancel-step-edit', function (e) {
                 e.preventDefault();
                 $('#text-editor').hide();
+                hideCurrentStepIndicator();
+            });
+
+            // Bind click event to clear selection button
+            $(document).on('click', '#clear-selection', function (e) {
+                e.preventDefault();
+                hideCurrentStepIndicator();
+                currentStepObject = {};
+                $('#text-editor').hide();
+            });
+
+            // Bind click event to cancel tour creation button
+            $(document).on('click', '#cancel-tour-creation', function (e) {
+                e.preventDefault();
+                $('#tour-editor').hide();
+                $('#start-tour-creation').show();
+                hideCurrentStepIndicator();
+                currentStepObject = {};
+            });
+
+            $(document).on('click', '#step-creation', function() {
+                startEditor();
             });
         };
 

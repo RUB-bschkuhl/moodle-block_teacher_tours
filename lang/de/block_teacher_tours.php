@@ -60,6 +60,8 @@ $string['advanced'] = 'Erweitert';
 $string['reflex'] = 'Automatisch weiter bei Klick';
 $string['addstep'] = 'Schritt hinzufügen';
 $string['preview'] = 'Vorschau';
+$string['currentlyediting'] = 'Aktuell bearbeitet';
+$string['clearselection'] = 'Auswahl löschen';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
 
