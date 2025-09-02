@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
 use block_teacher_tours\tour\manager;
@@ -58,8 +58,9 @@ $jsondata = '{
             "tourid": null,
             "title": "Welcome to the course",
             "content": "This is your course homepage where you can access all materials",
-            "targettype": 2,
-            "targetvalue": "section-0",
+            "contentformat": 1,
+            "targettype": 0,
+            "targetvalue": "#section-0",
             "sortorder": 0,
             "configdata": {
                 "placement": "bottom",
@@ -71,8 +72,9 @@ $jsondata = '{
             "tourid": null,
             "title": "Assignment Section",
             "content": "Submit your assignments here",
-            "targettype": 2,
-            "targetvalue": "module-5",
+            "contentformat": 1,
+            "targettype": 0,
+            "targetvalue": "#module-5",
             "sortorder": 1,
             "configdata": {
                 "placement": "right",
@@ -84,8 +86,9 @@ $jsondata = '{
             "tourid": null,
             "title": "Forum Activity",
             "content": "Participate in discussions with your classmates",
-            "targettype": 2,
-            "targetvalue": "module-7",
+            "contentformat": 1,
+            "targettype": 0,
+            "targetvalue": "#module-7",
             "sortorder": 2,
             "configdata": {
                 "placement": "left",
@@ -125,8 +128,9 @@ if ($result['success']) {
                 "tourid": null,
                 "title": "Updated Welcome",
                 "content": "Welcome to the updated course tour!",
-                "targettype": 2,
-                "targetvalue": "section-0",
+                "contentformat": 1,
+                "targettype": 0,
+                "targetvalue": "#section-0",
                 "sortorder": 0,
                 "configdata": {
                     "placement": "top",
@@ -138,8 +142,9 @@ if ($result['success']) {
                 "tourid": null,
                 "title": "New Resource Section",
                 "content": "Access course resources and materials here",
-                "targettype": 2,
-                "targetvalue": "module-10",
+                "contentformat": 1,
+                "targettype": 0,
+                "targetvalue": "#module-10",
                 "sortorder": 1,
                 "configdata": {
                     "placement": "bottom",
