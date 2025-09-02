@@ -52,81 +52,120 @@ class tour_api extends external_api {
      */
     public static function save_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'tourid' => new external_value(PARAM_INT, 'Tour ID (0 for new)', VALUE_DEFAULT, 0),
-            'courseid' => new external_value(PARAM_INT, 'Course ID'),
-            'name' => new external_value(PARAM_TEXT, 'Tour name'),
-            'description' => new external_value(PARAM_TEXT, 'Tour description', VALUE_DEFAULT, ''),
-            'steps' => new external_value(PARAM_RAW, 'JSON encoded steps array'),
-            'enabled' => new external_value(PARAM_BOOL, 'Enabled status', VALUE_DEFAULT, true)
+            'tour' => new external_single_structure([
+                'steps' => new external_multiple_structure(
+                    new external_single_structure([
+                        'title' => new external_value(PARAM_TEXT, 'Step title'),
+                        'content' => new external_value(PARAM_TEXT, 'Step content'),
+                        'targettype' => new external_value(PARAM_TEXT, 'Target type'),
+                        'targetvalue' => new external_value(PARAM_TEXT, 'Target value'),
+                        'placement' => new external_value(PARAM_TEXT, 'Placement'),
+                        'orphan' => new external_value(PARAM_TEXT, 'Orphan setting'),
+                        'backdrop' => new external_value(PARAM_TEXT, 'Backdrop setting'),
+                        'reflex' => new external_value(PARAM_TEXT, 'Reflex setting')
+                    ])
+                ),
+                'name' => new external_value(PARAM_TEXT, 'Tour name'),
+                'description' => new external_value(PARAM_TEXT, 'Tour description'),
+                'pathmatch' => new external_value(PARAM_TEXT, 'Path match'),
+                'enabled' => new external_value(PARAM_TEXT, 'Enabled status'),
+                'filter_values' => new external_value(PARAM_TEXT, 'Filter values'),
+                'sortorder' => new external_value(PARAM_TEXT, 'Sort order')
+            ])
         ]);
     }
 
     /**
      * Save a tour (create or update).
      *
-     * @param int $tourid         Tour ID (0 for new)
-     * @param int $courseid       Course ID
-     * @param string $name        Tour name
-     * @param string $description Tour description
-     * @param string $steps       JSON encoded steps
-     * @param bool $enabled       Enabled status
+     * @param array $tour Tour data from frontend
      *
      * @return array Result
      */
-    public static function save_tour(int $tourid, int $courseid, string $name, string $description, string $steps, bool $enabled): array {
+    public static function save_tour(array $tour): array {
+        global $DB;
 
         $params = self::validate_parameters(self::save_tour_parameters(), [
-            'tourid' => $tourid,
-            'courseid' => $courseid,
-            'name' => $name,
-            'description' => $description,
-            'steps' => $steps,
-            'enabled' => $enabled
+            'tour' => $tour
         ]);
 
+        $tourdata = $params['tour'];
+        
+        // Extract course ID from pathmatch
+        preg_match('/id=(\d+)/', $tourdata['pathmatch'], $matches);
+        $courseid = isset($matches[1]) ? (int)$matches[1] : 0;
+        
+        if (!$courseid) {
+            throw new \invalid_parameter_exception('Invalid course ID in pathmatch');
+        }
+
         // Check course context.
-        $context = context_course::instance($params['courseid']);
+        $context = context_course::instance($courseid);
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        // Decode steps JSON.
-        $stepsarray = json_decode($params['steps'], true);
-        if ($stepsarray === null && $params['steps'] !== 'null' && $params['steps'] !== '[]') {
-            throw new \invalid_parameter_exception('Invalid JSON in steps parameter');
-        }
-        $stepsarray = $stepsarray ?? [];
-
-        if ($params['tourid'] > 0) {
-            // Update existing tour.
-            $success = manager::update_tour($params['tourid'], [
-                'name' => $params['name'],
-                'description' => $params['description'],
-                'steps' => $stepsarray,
-                'enabled' => $params['enabled']
-            ]);
-            
+        // Prepare tour data for database
+        $toursave = new \stdClass();
+        $toursave->name = $tourdata['name'];
+        $toursave->description = $tourdata['description'];
+        $toursave->pathmatch = $tourdata['pathmatch'];
+        $toursave->enabled = ($tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
+        $toursave->sortorder = is_numeric($tourdata['sortorder']) ? (int)$tourdata['sortorder'] : 0;
+        
+        // Prepare configdata
+        $configdata = [
+            'courseid' => $courseid,
+            'teacher_tour' => true
+        ];
+        $toursave->configdata = json_encode($configdata);
+        
+        // Insert tour into database
+        $tourid = $DB->insert_record('tool_usertours_tours', $toursave);
+        
+        if (!$tourid) {
             return [
-                'success' => $success,
-                'tourid' => $params['tourid']
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Failed to create tour'
             ];
-        } else {
-            // Create new tour.
-            $newtourid = manager::create_tour(
-                $params['courseid'],
-                $params['name'],
-                $params['description'],
-                $stepsarray
-            );
+        }
+        
+        // Insert steps
+        foreach ($tourdata['steps'] as $index => $step) {
+            $stepsave = new \stdClass();
+            $stepsave->tourid = $tourid;
+            $stepsave->title = $step['title'] ?? '';
+            $stepsave->content = $step['content'] ?? '';
             
-            if ($newtourid && !$params['enabled']) {
-                manager::set_tour_enabled($newtourid, false);
+            // Convert targettype from string to int
+            $stepsave->targettype = is_numeric($step['targettype']) ? (int)$step['targettype'] : 0;
+            
+            // Ensure targetvalue has proper format
+            $targetvalue = $step['targetvalue'] ?? '';
+            if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
+                $targetvalue = '#' . $targetvalue;
             }
+            $stepsave->targetvalue = $targetvalue;
             
-            return [
-                'success' => $newtourid > 0,
-                'tourid' => $newtourid
+            $stepsave->sortorder = $index;
+            
+            // Prepare step configdata
+            $stepconfig = [
+                'placement' => $step['placement'] ?? 'bottom',
+                'orphan' => ($step['orphan'] === 'true'),
+                'backdrop' => ($step['backdrop'] === 'true'),
+                'reflex' => ($step['reflex'] === 'true')
             ];
+            $stepsave->configdata = json_encode($stepconfig);
+            
+            $DB->insert_record('tool_usertours_steps', $stepsave);
         }
+        
+        return [
+            'success' => true,
+            'tourid' => $tourid,
+            'message' => 'Tour created successfully'
+        ];
     }
 
     /**
@@ -137,7 +176,8 @@ class tour_api extends external_api {
     public static function save_tour_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-            'tourid' => new external_value(PARAM_INT, 'Tour ID')
+            'tourid' => new external_value(PARAM_INT, 'Tour ID'),
+            'message' => new external_value(PARAM_TEXT, 'Response message')
         ]);
     }
 

@@ -483,8 +483,22 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            $step->targettype = $stepdata['targettype'] ?? 2; // Default to SELECTOR
-            $step->targetvalue = $stepdata['targetvalue'] ?? '';
+            
+            // Handle targettype and targetvalue based on frontend selection
+            // In Moodle 5.0, targettype values are:
+            // 0 = SELECTOR (CSS selector like #module-123)
+            // 1 = BLOCK (block instance)
+            // 2 = UNATTACHED (no specific target)
+            $targetvalue = $stepdata['targetvalue'] ?? '';
+            
+            // Ensure targetvalue has proper format for CSS selectors
+            if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
+                // Add # prefix if missing
+                $targetvalue = '#' . $targetvalue;
+            }
+            
+            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
+            $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
             $step->configdata = json_encode($stepdata['configdata'] ?? [
                 'placement' => 'bottom',
@@ -548,8 +562,22 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            $step->targettype = $stepdata['targettype'] ?? 2;
-            $step->targetvalue = $stepdata['targetvalue'] ?? '';
+            
+            // Handle targettype and targetvalue based on frontend selection
+            // In Moodle 5.0, targettype values are:
+            // 0 = SELECTOR (CSS selector like #module-123)
+            // 1 = BLOCK (block instance)
+            // 2 = UNATTACHED (no specific target)
+            $targetvalue = $stepdata['targetvalue'] ?? '';
+            
+            // Ensure targetvalue has proper format for CSS selectors
+            if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
+                // Add # prefix if missing
+                $targetvalue = '#' . $targetvalue;
+            }
+            
+            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
+            $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
             $step->configdata = json_encode($stepdata['configdata'] ?? [
                 'placement' => 'bottom',
