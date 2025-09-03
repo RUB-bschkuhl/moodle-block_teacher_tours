@@ -32,8 +32,8 @@ $string['teacher_tours:view'] = 'View the Teacher Tours block';
 // Template strings
 $string['blockdescription'] = 'Create guided tours for your course to help students navigate and understand course content.';
 $string['existingtours'] = 'Existing Tours';
-$string['createnewtour'] = 'Create New Tour';
-$string['createnewstickytour'] = 'Create New Sticky Tour';
+$string['createnewtour'] = 'Create Tour';
+$string['createnewstickytour'] = 'Create Sticky Tour';
 $string['managetours'] = 'Manage Tours';
 $string['creatingtour'] = 'Creating New Tour';
 $string['tourinstructions'] = 'Click on course elements to add them as tour steps, then add text to each step.';
@@ -63,6 +63,9 @@ $string['addstep'] = 'Add Step';
 $string['preview'] = 'Preview';
 $string['currentlyediting'] = 'Current target';
 $string['clearselection'] = 'Clear selection';
+$string['selectplacement'] = 'Select placement';
+$string['selectedplacement'] = 'Selected placement';
+$string['touravailable'] = 'Tour available';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
 
