@@ -79,6 +79,9 @@ class manager {
                 self::add_step_to_tour($tour, $stepdata);
             }
         }
+        
+        // Reset tour for all users so it's immediately visible
+        $tour->mark_major_change();
 
         return $tour->get_id();
     }
@@ -508,6 +511,10 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
+        
+        // Reset tour for all users so it's immediately visible.
+        $tour = tour::instance($tourid);
+        $tour?->mark_major_change();
 
         return ['success' => true, 'tourid' => $tourid];
     }
@@ -587,6 +594,10 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
+        
+        // Reset tour for all users so the updated tour is immediately visible
+        $tour = tour::instance($tourid);
+        $tour?->mark_major_change();
 
         return ['success' => true, 'tourid' => $tourid];
     }
