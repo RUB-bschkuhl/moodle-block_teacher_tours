@@ -58,6 +58,17 @@
   margin-right: 8px;
 }
 
+.tour-step-preview .edit-step-icon {
+  color: #6c757d;
+  transition: color 0.2s;
+  margin-left: auto;
+}
+
+.tour-step-preview .edit-step-icon:hover {
+  color: #007bff;
+  cursor: pointer;
+}
+
 /* Instructions Styling */
 .editor-instructions {
   background-color: #e7f3ff;

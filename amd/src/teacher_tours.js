@@ -89,8 +89,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             $('.tour-preview').html('');
             tourObject.steps.forEach((step, index) => {
                 $('.tour-preview')
-                    .append('<div class="tour-step-preview">Step ' + (index + 1) +
-                        ' <strong> ' + step.targetvalue + ':</strong> ' + step.title + '</div>');
+                    .append('<div class="tour-step-preview" data-step-index="' + index + '">Step ' + (index + 1) +
+                        ' <strong> ' + step.targetvalue + ':</strong> ' + step.title +
+                        ' <i class="fa fa-pencil edit-step-icon" style="float: right; cursor: pointer; margin-left: 10px;">' +
+                        '</i></div>');
             });
             $('.tour-preview').show();
         };
@@ -111,7 +113,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             // Make AJAX call to backend to save the state
             Ajax.call([{
                 methodname: 'block_teacher_tours_toggle_tour_enabled',
-                args: { tourid: tourId, enabled: enabled }
+                args: {tourid: tourId, enabled: enabled}
             }])[0].done(function (response) {
                 if (response.success) {
                     // Update the UI based on the actual state from server.
@@ -162,7 +164,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 // Make AJAX call to backend to delete the tour
                 Ajax.call([{
                     methodname: 'block_teacher_tours_delete_tour',
-                    args: { tourid: tourId }
+                    args: {tourid: tourId}
                 }])[0].done(function (response) {
                     if (response.success) {
                         // Remove the card from UI with animation
@@ -344,11 +346,16 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         };
 
         // The second step on creating a step for the tour is creating a text that should show when the step is active
-        const startTextEditor = function () {
+        const startTextEditor = function (editIndex = null) {
             $('#text-editor').show();
-            clearTextEditor();
+            if (editIndex === null) {
+                clearTextEditor();
+            }
             $('#save-tour').hide();
             $('#step-title').focus();
+
+            // Store edit index for later use
+            $('#text-editor').data('edit-index', editIndex);
         };
 
         const clearTextEditor = function () {
@@ -443,6 +450,36 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             tourObject.steps.push(stepData || {});
         };
 
+        // Edit an existing step
+        const editStep = function (stepIndex) {
+            if (stepIndex < tourObject.steps.length) {
+                const step = tourObject.steps[stepIndex];
+
+                // Populate the form with existing step data
+                $('#step-title').val(step.title);
+                $('#step-content').val(step.content);
+
+                // Show the text editor with edit mode
+                startTextEditor(stepIndex);
+
+                // Hide tour save button while editing
+                $('#save-tour').hide();
+
+                // Update current step object for any placement changes
+                currentStepObject = {
+                    targettype: step.targettype,
+                    targetvalue: step.targetvalue,
+                    placement: step.placement,
+                    orphan: step.orphan,
+                    backdrop: step.backdrop,
+                    reflex: step.reflex
+                };
+
+                // Show current step indicator
+                showCurrentStepIndicator('Editing: ' + step.targetvalue);
+            }
+        };
+
         // Save the current step to the tour object
         const saveStep = function () {
             // Get values from the form
@@ -454,16 +491,30 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             // const orphan = $('#step-orphan').prop('checked') ? 'true' : 'false';
             // const reflex = $('#step-reflex').prop('checked') ? 'true' : 'false';
 
-            // Update the current step object with form values
-            currentStepObject.title = title;
-            currentStepObject.content = content;
-            // currentStepObject.placement = placement;
-            // currentStepObject.backdrop = backdrop;
-            // currentStepObject.orphan = orphan;
-            // currentStepObject.reflex = reflex;
+            // Check if we're editing an existing step
+            const editIndex = $('#text-editor').data('edit-index');
 
-            // Add the step to the tour
-            addStep(currentStepObject);
+            if (editIndex !== null && editIndex !== undefined) {
+                // Update existing step
+                tourObject.steps[editIndex].title = title;
+                tourObject.steps[editIndex].content = content;
+                showTourStepsPreview();
+                clearTextEditor();
+                $('#text-editor').hide();
+                $('#save-tour').show();
+                $('#text-editor').data('edit-index', null);
+            } else {
+                // Update the current step object with form values
+                currentStepObject.title = title;
+                currentStepObject.content = content;
+                // currentStepObject.placement = placement;
+                // currentStepObject.backdrop = backdrop;
+                // currentStepObject.orphan = orphan;
+                // currentStepObject.reflex = reflex;
+
+                // Add the step to the tour
+                addStep(currentStepObject);
+            }
         };
 
         // Initialize event bindings
@@ -500,6 +551,14 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 resetCurrentStepObject();
                 // Restart the editor to pick the next element
                 startEditor();
+            });
+
+            // Bind click event to edit step icon
+            $(document).on('click', '.edit-step-icon', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const stepIndex = $(this).parent().data('step-index');
+                editStep(stepIndex);
             });
 
             // Bind click event to cancel step edit button
