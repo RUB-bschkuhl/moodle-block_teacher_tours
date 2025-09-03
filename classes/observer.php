@@ -94,11 +94,6 @@ class observer {
 
                 // Delete the tour.
                 $tour->remove();
-
-                // Also delete the record from block_teacher_tours table.
-                if ($recordtodelete) {
-                    $DB->delete_records('block_teacher_tours', ['id' => $recordtodelete->id]);
-                }
             } catch (\Exception $e) {
                 // Log the error but don't throw it to avoid breaking the event flow.
                 debugging('Error deleting teacher tour: ' . $e->getMessage(), DEBUG_DEVELOPER);
