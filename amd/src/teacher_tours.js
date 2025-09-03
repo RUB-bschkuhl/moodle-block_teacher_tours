@@ -48,6 +48,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             sortorder: '',
         };
 
+        let stickyTarget = null;
+        let sticky = false;
+
         let currentStepObject = {};
 
         // Init the tourobject and starts the editor
@@ -60,10 +63,15 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         const startEditor = function () {
             // Hide the create new tour button when editing
             $('#start-tour-creation').hide();
+            $('#start-sticky-creation').hide();
             $('#step-creation').hide();
             // Show the tour editor interface
             $('#tour-editor').show();
-            highlightElements();
+            if (sticky) {
+                highlightPlacements();
+            } else {
+                highlightElements();
+            }
         };
 
         // Show current step indicator
@@ -99,7 +107,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             // Make AJAX call to backend to save the state
             Ajax.call([{
                 methodname: 'block_teacher_tours_toggle_tour_enabled',
-                args: {tourid: tourId, enabled: enabled}
+                args: { tourid: tourId, enabled: enabled }
             }])[0].done(function (response) {
                 if (response.success) {
                     // Update the UI based on the actual state from server.
@@ -150,7 +158,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 // Make AJAX call to backend to delete the tour
                 Ajax.call([{
                     methodname: 'block_teacher_tours_delete_tour',
-                    args: {tourid: tourId}
+                    args: { tourid: tourId }
                 }])[0].done(function (response) {
                     if (response.success) {
                         // Remove the card from UI with animation
@@ -172,6 +180,30 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Store event handlers for specific removal
         const tourEventHandlers = {
+            stickySelectClick: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = e.currentTarget;
+                if (element.classList.contains('section-sticky-highlight')) {
+                    element.classList.remove('section-sticky-highlight');
+                    element.classList.add('section-sticky-button');
+                    Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
+                        element.html(text);
+                    });
+                } else if (element.classList.contains('header-sticky-highlight')) {
+                    element.classList.remove('header-sticky-highlight');
+                    element.classList.add('header-sticky-button');
+                    Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
+                        element.html(text);
+                    });
+                }
+                //todo element get parent and get id
+                let parent = element.parentElement;
+                stickyTarget = parent.getAttribute('id');
+                removeHighlighting();
+                sticky = false;
+                highlightElements();
+            },
             sectionClick: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -224,6 +256,38 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             });
         };
 
+
+        // Highlight the elements
+        const highlightPlacements = function () {
+            // TODO consider case of multiple tours on one element
+            // "Highlight" the section placements and the course header placement
+            // onclick remove pseudo elements and handle click in differenct function
+            Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
+                document.querySelectorAll('[id^="section-"]').forEach(section => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-sm btn-outline-primary section-sticky-highlight';
+                    button.textContent = text + ' ';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa fa-question-circle';
+                    button.append(icon);
+                    section.style.position = 'relative';
+                    section.prepend(button);
+                    button.addEventListener('click', tourEventHandlers.stickySelectClick);
+                });
+                document.querySelectorAll('[id="page-header"]').forEach(mod => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-sm btn-outline-primary header-sticky-highlight';
+                    button.textContent = text + ' ';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa fa-question-circle';
+                    button.append(icon);
+                    mod.style.position = 'relative';
+                    mod.prepend(button);
+                    button.addEventListener('click', tourEventHandlers.stickySelectClick);
+                });
+            });
+        };
+
         // The second step on creating a step for the tour is creating a text that should show when the step is active
         const startTextEditor = function () {
             $('#text-editor').show();
@@ -242,32 +306,51 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         };
 
         const removeHighlighting = function () {
-            // Remove the highlighting from the elements and their specific event listeners
-            document.querySelectorAll('[id^="section-"]').forEach(section => {
-                section.classList.remove('section-highlight');
-                section.removeEventListener('click', tourEventHandlers.sectionClick);
-            });
-            document.querySelectorAll('[id^="module-"]').forEach(mod => {
-                mod.classList.remove('module-highlight');
-                mod.removeEventListener('click', tourEventHandlers.moduleClick);
-            });
+            if (sticky) {
+                document.querySelectorAll('.section-sticky-highlight').forEach(section => {
+                    section.remove();
+                });
+                document.querySelectorAll('.header-sticky-highlight').forEach(mod => {
+                    mod.remove();
+                });
+            } else {
+                // Remove the highlighting from the elements and their specific event listeners
+                document.querySelectorAll('[id^="section-"]').forEach(section => {
+                    section.classList.remove('section-highlight');
+                    section.removeEventListener('click', tourEventHandlers.sectionClick);
+                });
+                document.querySelectorAll('[id^="module-"]').forEach(mod => {
+                    mod.classList.remove('module-highlight');
+                    mod.removeEventListener('click', tourEventHandlers.moduleClick);
+                });
+            }
+
         };
 
         // Send the tourObject to the endpoint
         const saveTour = function () {
             $('#save-tour').prop('disabled', true).text('Saving...');
             // Send the tourObject to the endpoint
+            let argsObj = {};
+            if (stickyTarget) {
+                argsObj = { tour: tourObject, stickytarget: stickyTarget };
+            } else {
+                argsObj = { tour: tourObject };
+            }
+            //TODO change endpoint?
             Ajax.call([{
                 methodname: 'block_teacher_tours_save_tour',
-                args: {tour: tourObject},
+                args: argsObj,
             }])[0].then(function (response) {
                 //If ok reset the tourObject, if not show error
                 if (!response && !response.status === 'ok') {
                     alert('Error saving tour: ' + (response.message || 'Unknown error'));
                 }
                 resetTourObject();
+
                 $('#tour-editor').hide();
                 $('#start-tour-creation').show();
+                $('#start-sticky-creation').show();
                 $('#step-creation').show();
                 hideCurrentStepIndicator();
                 clearTextEditor();
@@ -283,6 +366,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Reset the tourObject
         const resetTourObject = function (courseid) {
+            stickyTarget = null;
+            sticky = false;
+
             tourObject = {
                 steps: [],
                 name: 'tour for course ' + courseid,
@@ -330,6 +416,13 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 startEditor();
             });
 
+            $(document).on('click', '#start-sticky-creation', function (e) {
+                e.preventDefault();
+                sticky = true;
+                startEditor();
+            });
+
+
             // Bind click event to save tour button
             $(document).on('click', '#save-tour', function (e) {
                 e.preventDefault();
@@ -364,6 +457,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             $(document).on('click', '#cancel-tour-creation', function (e) {
                 e.preventDefault();
                 $('#tour-editor').hide();
+                $('#start-sticky-creation').show();
                 $('#start-tour-creation').show();
                 hideCurrentStepIndicator();
                 resetTourObject();
@@ -398,6 +492,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Return public API
         return {
+            sticky: sticky,
             currentStepObject: currentStepObject,
             tourObject: tourObject,
             init: init,
