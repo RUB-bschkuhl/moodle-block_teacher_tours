@@ -185,20 +185,26 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         const handleTourDelete = function (tourId) {
             // console.log('Deleting tour', tourId);
             if (confirm('Are you sure you want to delete this tour? This action cannot be undone.')) {
-                // TODO: Make AJAX call to backend to save the state
-                // Ajax.call([{
-                //     methodname: 'block_teacher_tours_delete_tour',
-                //     args: { tourid: tourId, enabled: enabled }
-                // }]);
-                // For now, just hide the card
-                $(`[data-tour-id="${tourId}"]`).fadeOut(300, function () {
-                    $(this).remove();
-                    // Check if no tours left
-                    if ($('.tour-card').length === 0) {
-                        $('.existing-tours').hide();
+                // Make AJAX call to backend to delete the tour
+                Ajax.call([{
+                    methodname: 'block_teacher_tours_delete_tour',
+                    args: {tourid: tourId}
+                }])[0].done(function (response) {
+                    if (response.success) {
+                        // Remove the card from UI with animation
+                        $(`[data-tour-id="${tourId}"]`).fadeOut(300, function () {
+                            $(this).remove();
+                            // Check if no tours left
+                            if ($('.tour-card').length === 0) {
+                                $('.existing-tours').hide();
+                            }
+                        });
+                    } else {
+                        alert('Failed to delete tour. Please try again.');
                     }
+                }).fail(function () {
+                    alert('Error deleting tour. Please try again.');
                 });
-                alert('Delete functionality will be implemented when backend is ready. Tour ID: ' + tourId);
             }
         };
 
