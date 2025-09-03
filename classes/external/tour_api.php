@@ -83,7 +83,7 @@ class tour_api extends external_api {
      * @return array Result
      */
     public static function save_tour(array $tour): array {
-        global $DB;
+        global $DB, $CFG;
 
         $params = self::validate_parameters(self::save_tour_parameters(), [
             'tour' => $tour
@@ -162,6 +162,12 @@ class tour_api extends external_api {
             
             $DB->insert_record('tool_usertours_steps', $stepsave);
         }
+        
+        // Reset tour for all users so it's immediately visible.
+        // Use Moodle's built-in method to mark a major change which resets tour state for all users.
+        require_once($CFG->dirroot . '/admin/tool/usertours/classes/tour.php');
+        $tour = \tool_usertours\tour::instance($tourid);
+        $tour?->mark_major_change();
         
         return [
             'success' => true,
