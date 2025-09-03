@@ -743,6 +743,7 @@ class tour_api extends external_api {
             'success' => true,
             'tourid' => $tourid,
             'message' => "Tour created successfully with {$stepsinserted} steps",
+            'reload' => true,  // Signal the frontend to reload the page
         ];
     }
 
@@ -756,6 +757,7 @@ class tour_api extends external_api {
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'tourid' => new external_value(PARAM_INT, 'Created tour ID'),
             'message' => new external_value(PARAM_TEXT, 'Result message'),
+            'reload' => new external_value(PARAM_BOOL, 'Whether to reload the page', VALUE_OPTIONAL),
         ]);
     }
 
