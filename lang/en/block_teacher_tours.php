@@ -69,3 +69,7 @@ $string['touravailable'] = 'Tour available';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
 
+$string['modulehighlight'] = 'Highlight Color for Modules';
+$string['modulehighlight_desc'] = 'Color used to highlight modules via the CSS selector tool.';
+$string['sectionhighlight'] = 'Highlight Color for Sections';
+$string['sectionhighlight_desc'] = 'Color used to highlight sections via the CSS selector tool.';

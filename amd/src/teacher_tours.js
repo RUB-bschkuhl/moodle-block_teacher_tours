@@ -55,6 +55,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Init the tourobject and starts the editor
         const init = function (courseid, customTours) {
+            init_styles();
             initializeEventBindings();
             Object.values(customTours).forEach(tour => {
                 console.log('tour', tour);
@@ -182,6 +183,335 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     alert('Error deleting tour. Please try again.');
                 });
             }
+        };
+        // Initialise style class for highlights
+        function hexToRgba(hex, opacity) {
+            // Remove '#' if present
+            hex = hex.replace(/^#/, '');
+
+            // Parse r, g, b values
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+
+        const init_styles = function () {
+            const colors = window.teachertoursColors;
+            const style = document.createElement('style');
+
+            const moduleHighlightopacity03 = hexToRgba(colors.moduleHighlight, 0.3);
+            const moduleHighlightopacity05 = hexToRgba(colors.moduleHighlight, 0.5);
+
+            const sectionHighlightopacity03 = hexToRgba(colors.sectionHighlight, 0.3);
+            const sectionHighlightopacity05 = hexToRgba(colors.sectionHighlight, 0.5);
+
+            style.textContent = `
+                /* Tour creation highlighting */
+                .module-highlight {
+                    background-color: ${moduleHighlightopacity03};
+                    border: 1px solid ${colors.moduleHighlight};
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border-radius: 1rem;
+                }
+                .module-highlight:hover {
+                    background-color: ${moduleHighlightopacity05};
+                    transform: scale(1.02);
+                }
+                .section-highlight {
+                    background-color: ${sectionHighlightopacity03};
+                    border: 1px solid ${colors.sectionHighlight};
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border-radius: 1rem;
+                }
+
+                .section-highlight:hover {
+                    background-color: ${sectionHighlightopacity05};
+                    transform: scale(1.02);
+                }
+
+                /* Tour Preview Styling */
+                .tour-preview {
+                    margin-bottom: 20px;
+                    background-color: #fff;
+                }
+
+                .tour-step-preview {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px 15px;
+                    margin-bottom: 8px;
+                    background-color: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 6px;
+                    border-left: 4px solid ${colors.moduleHighlight};
+                    font-size: 14px;
+                    transition: all 0.2s ease;
+                }
+
+                .tour-step-preview:hover {
+                    background-color: #e9ecef;
+                    transform: translateX(2px);
+                }
+
+                .tour-step-preview:last-child {
+                    margin-bottom: 0;
+                }
+
+                .tour-step-preview strong {
+                    color: #495057;
+                    margin-right: 8px;
+                }
+
+                .tour-step-preview .edit-step-icon {
+                    color: #6c757d;
+                    transition: color 0.2s;
+                    margin-left: auto;
+                }
+
+                    .tour-step-preview .edit-step-icon:hover {
+                    color: #007bff;
+                    cursor: pointer;
+                }
+
+                /* Instructions Styling */
+                .editor-instructions {
+                    background-color: #e7f3ff;
+                    border: 1px solid #b8daff;
+                    border-radius: 6px;
+                    padding: 12px 16px;
+                    margin-bottom: 20px;
+                    color: ${colors.moduleHighlight};
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .editor-instructions::before {
+                    content: "💡";
+                    margin-right: 10px;
+                    font-size: 16px;
+                }
+
+                /* Current Step Indicator */
+                .current-step-indicator .alert {
+                    margin-bottom: 15px;
+                    border-left: 4px solid #17a2b8;
+                }
+
+                /* Add Step Button Container */
+                .add-step-container {
+                    text-align: center;
+                    padding: 20px;
+                    border: 2px dashed #dee2e6;
+                    border-radius: 8px;
+                    background-color: #f8f9fa;
+                    margin-top: 15px;
+                }
+
+                .add-step-container:hover {
+                    border-color: ${colors.moduleHighlight};
+                    background-color: #e7f3ff;
+                }
+
+                /* Text Editor Styling */
+                .text-editor {
+                    margin-top: 20px;
+                    padding: 20px;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    background-color: white;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .text-editor-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid #dee2e6;
+                }
+
+                /* Tour Cards Styling */
+                .tour-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                    margin-bottom: 20px;
+                }
+
+                .tour-card {
+                    background: white;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    padding: 16px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                    transition: all 0.2s ease;
+                }
+
+                .tour-card:hover {
+                    border-color: ${colors.moduleHighlight};
+                    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
+                    transform: translateY(-1px);
+                }
+
+                .tour-card-header {
+                    margin-bottom: 12px;
+                }
+
+                .tour-info {
+                    flex: 1;
+                    margin-right: 20px;
+                }
+
+                .tour-name {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #343a40;
+                    margin: 0 0 8px 0;
+                    line-height: 1.3;
+                }
+
+                .tour-description {
+                    color: #6c757d;
+                    font-size: 14px;
+                    margin: 0;
+                    line-height: 1.4;
+                    max-width: 400px;
+                }
+
+                .tour-controls {
+                    margin-top: 8px;
+                    flex-shrink: 0;
+                }
+
+                .form-switch {
+                    margin-bottom: 0;
+                }
+
+                .form-switch .form-check-input {
+                    width: 2.5em;
+                    height: 1.25em;
+                }
+
+                .form-switch .form-check-label {
+                    font-size: 13px;
+                    margin-left: 10px;
+                    color: #6c757d;
+                }
+
+                .tour-toggle:checked+.form-check-label .enabled-text {
+                    color: #28a745;
+                    font-weight: 500;
+                }
+
+                .tour-toggle:not(:checked)+.form-check-label .enabled-text {
+                    display: none;
+                }
+
+                .tour-toggle:checked+.form-check-label .disabled-text {
+                    display: none;
+                }
+
+                .tour-card-footer {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 12px;
+                    padding-top: 12px;
+                    border-top: 1px solid #f8f9fa;
+                }
+
+                .tour-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 13px;
+                }
+
+                .tour-actions-small {
+                    display: flex;
+                    gap: 8px;
+                }
+
+                .tour-actions-small .btn {
+                    padding: 4px 8px;
+                    font-size: 12px;
+                }
+                
+                .tour-actions {
+                    display: flex;
+                    gap: 12px;
+                }
+
+                /* Empty state for no tours */
+                .existing-tours:empty::before {
+                    content: "No tours created yet. Click 'Create New Tour' to get started.";
+                    display: block;
+                    text-align: center;
+                    color: #6c757d;
+                    font-style: italic;
+                    padding: 40px 20px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    border: 2px dashed #dee2e6;
+                }
+
+                .btn.btn-sm.btn-outline-primary.section-sticky-highlight {
+                    border-style: dashed;
+                    position: absolute;
+                    top: -0.5rem;
+                    right: -0.5rem;
+                    background: white;
+                }
+
+                .btn.btn-sm.btn-outline-primary.section-sticky-highlight:hover {
+                    color: inherit;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.section-sticky-button {
+                    border-style: solid;
+                    position: absolute;
+                    top: -0.5rem;
+                    right: -0.5rem;
+                    background: white;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.section-sticky-button:hover {
+                    color: inherit;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.header-sticky-highlight {
+                    border-style: dashed;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: white;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.header-sticky-button {
+                    border-style: solid;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: white;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.header-sticky-highlight:hover {
+                    color: inherit;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.header-sticky-button:hover {
+                    color: inherit;
+                }
+ 
+            `;
+
+            document.head.appendChild(style);
         };
 
         // Store event handlers for specific removal
