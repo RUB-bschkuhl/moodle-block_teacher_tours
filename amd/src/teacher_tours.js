@@ -335,6 +335,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     padding-bottom: 15px;
                     border-bottom: 1px solid #dee2e6;
                 }
+
                 /* Tour Cards Styling */
                 .tour-list {
                     display: flex;
@@ -353,7 +354,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 }
 
                 .tour-card:hover {
-                    border-color: #007bff;
+                    border-color: ${colors.moduleHighlight};
                     box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
                     transform: translateY(-1px);
                 }
