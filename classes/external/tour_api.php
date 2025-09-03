@@ -131,6 +131,7 @@ class tour_api extends external_api {
             // For custom tours, store only in block_teacher_tours table
             $customsave = new \stdClass();
             $customsave->rawdata = json_encode($toursave);
+            $customsave->courseid = $courseid;
             $tourid = $DB->insert_record('block_teacher_tours', $customsave);
 
             if (!$tourid) {
