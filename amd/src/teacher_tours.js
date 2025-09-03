@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 /**
-* JavaScript for handling tour creation via button click.
-*
-* @module block_teacher_tours/teacher_tours
-* @copyright 2025 Your Name <your.email@example.com>
-* @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * JavaScript for handling tour creation via button click.
+ *
+ * @module block_teacher_tours/teacher_tours
+ * @copyright 2025 Your Name <your.email@example.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
     function ($, Ajax, Str) { //Templates
@@ -132,40 +132,58 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Handle tour toggle switches
         const handleTourToggle = function (tourId, enabled) {
-            console.log('Toggling tour', tourId, 'to', enabled ? 'enabled' : 'disabled');
-            // Update the status indicator in the footer
-            const tourCard = $(`[data-tour-id="${tourId}"]`);
-            const statusElement = tourCard.find('.tour-status');
-            if (enabled) {
-                Str.get_string('enabled', 'block_teacher_tours')
-                    .then(function (enabledText) {
-                        statusElement.html('<i class="fa fa-check-circle text-success"></i> ' + enabledText);
-                    });
-                tourCard.find('.tour-toggle').prop('checked', true);
-            } else {
-                Str.get_string('disabled', 'block_teacher_tours')
-                    .then(function (disabledText) {
-                        statusElement.html('<i class="fa fa-times-circle text-muted"></i> ' + disabledText);
-                    });
-                tourCard.find('.tour-toggle').prop('checked', false);
-            }
-            // TODO: Make AJAX call to backend to save the state
-            // Ajax.call([{
-            //     methodname: 'block_teacher_tours_toggle_tour',
-            //     args: { tourid: tourId, enabled: enabled }
-            // }]);
+            // console.log('Toggling tour', tourId, 'to', enabled ? 'enabled' : 'disabled');
+
+            // Make AJAX call to backend to save the state
+            Ajax.call([{
+                methodname: 'block_teacher_tours_toggle_tour_enabled',
+                args: {tourid: tourId, enabled: enabled}
+            }])[0].done(function (response) {
+                if (response.success) {
+                    // Update the UI based on the actual state from server.
+                    const tourCard = $(`[data-tour-id="${tourId}"]`);
+                    const statusElement = tourCard.find('.tour-status');
+
+                    if (response.enabled) {
+                        Str.get_string('enabled', 'block_teacher_tours')
+                            .then(function (enabledText) {
+                                statusElement.html('<i class="fa fa-check-circle text-success"></i> ' + enabledText);
+                            });
+                        tourCard.find('.tour-toggle').prop('checked', true);
+                    } else {
+                        Str.get_string('disabled', 'block_teacher_tours')
+                            .then(function (disabledText) {
+                                statusElement.html('<i class="fa fa-times-circle text-muted"></i> ' + disabledText);
+                            });
+                        tourCard.find('.tour-toggle').prop('checked', false);
+                    }
+                    // console.log('Tour toggle successful');
+                } else {
+                    // Revert the toggle if the operation failed
+                    // console.error('Failed to toggle tour');
+                    const tourCard = $(`[data-tour-id="${tourId}"]`);
+                    tourCard.find('.tour-toggle').prop('checked', !enabled);
+                    alert('Failed to update tour status. Please try again.');
+                }
+            }).fail(function () {
+                // console.error('Error toggling tour:', error);
+                // Revert the toggle on error
+                const tourCard = $(`[data-tour-id="${tourId}"]`);
+                tourCard.find('.tour-toggle').prop('checked', !enabled);
+                alert('Error updating tour status. Please try again.');
+            });
         };
 
         // Handle tour editing
         const handleTourEdit = function (tourId) {
-            console.log('Editing tour', tourId);
+            // console.log('Editing tour', tourId);
             // TODO: Should open the form in the backend to edit the tour
             alert('Edit functionality will be implemented when backend is ready. Tour ID: ' + tourId);
         };
 
         // Handle tour deletion
         const handleTourDelete = function (tourId) {
-            console.log('Deleting tour', tourId);
+            // console.log('Deleting tour', tourId);
             if (confirm('Are you sure you want to delete this tour? This action cannot be undone.')) {
                 // TODO: Make AJAX call to backend to save the state
                 // Ajax.call([{
@@ -273,7 +291,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             // Send the tourObject to the endpoint
             Ajax.call([{
                 methodname: 'block_teacher_tours_save_tour',
-                args: { tour: tourObject },
+                args: {tour: tourObject},
             }])[0].then(function (response) {
                 //If ok reset the tourObject, if not show error
                 if (!response && !response.status === 'ok') {
@@ -289,7 +307,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 $('.tour-preview').html('');
                 $('.tour-preview').hide();
                 Str.get_string('savetour', 'block_teacher_tours')
-                    .then(function (text) { $('#save-tour').prop('disabled', false).html('<i class="fa fa-save"></i> ' + text); });
+                    .then(function (text) {
+                        $('#save-tour').prop('disabled', false).html('<i class="fa fa-save"></i> ' + text);
+                    });
             });
         };
 

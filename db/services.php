@@ -89,6 +89,17 @@ $functions = [
         'ajax'        => true,
         'capabilities' => 'moodle/course:view',
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_toggle_tour_enabled' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'toggle_tour_enabled',
+        'classpath'   => '',
+        'description' => 'Toggle tour enabled/disabled status',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:manageactivities',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
     ]
 ];
 
@@ -100,7 +111,8 @@ $services = [
             'block_teacher_tours_get_course_tours',
             'block_teacher_tours_delete_tour',
             'block_teacher_tours_update_steps',
-            'block_teacher_tours_start_tour'
+            'block_teacher_tours_start_tour',
+            'block_teacher_tours_toggle_tour_enabled'
         ],
         'restrictedusers' => 0,
         'enabled' => 1,

@@ -502,4 +502,65 @@ class tour_api extends external_api {
             'steps' => new external_value(PARAM_RAW, 'JSON encoded steps')
         ]);
     }
+    
+    /**
+     * Parameters for toggle_tour_enabled.
+     *
+     * @return external_function_parameters
+     */
+    public static function toggle_tour_enabled_parameters(): external_function_parameters {
+        return new external_function_parameters([
+            'tourid' => new external_value(PARAM_INT, 'Tour ID'),
+            'enabled' => new external_value(PARAM_BOOL, 'Enabled status')
+        ]);
+    }
+    
+    /**
+     * Toggle tour enabled/disabled status.
+     *
+     * @param int $tourid Tour ID
+     * @param bool $enabled Whether tour should be enabled
+     *
+     * @return array Result with success status
+     */
+    public static function toggle_tour_enabled(int $tourid, bool $enabled): array {
+        $params = self::validate_parameters(self::toggle_tour_enabled_parameters(), [
+            'tourid' => $tourid,
+            'enabled' => $enabled
+        ]);
+        
+        // Get the tour to check permissions
+        $tour = manager::get_tour($params['tourid']);
+        if (!$tour) {
+            throw new \moodle_exception('tournotfound', 'block_teacher_tours');
+        }
+        
+        // Get tour data for context check
+        $tourdata = manager::format_tour_for_frontend($tour);
+        
+        // Check course context.
+        $context = context_course::instance($tourdata['courseid']);
+        self::validate_context($context);
+        require_capability('moodle/course:manageactivities', $context);
+        
+        // Toggle the enabled status
+        $success = manager::set_tour_enabled($params['tourid'], $params['enabled']);
+        
+        return [
+            'success' => $success,
+            'enabled' => $params['enabled']
+        ];
+    }
+    
+    /**
+     * Return definition for toggle_tour_enabled.
+     *
+     * @return external_single_structure
+     */
+    public static function toggle_tour_enabled_returns(): external_single_structure {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'Success status'),
+            'enabled' => new external_value(PARAM_BOOL, 'New enabled status')
+        ]);
+    }
 }
