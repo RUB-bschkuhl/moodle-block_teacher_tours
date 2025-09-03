@@ -32,7 +32,8 @@ $string['teacher_tours:view'] = 'Den Lehrer Touren Block anzeigen';
 // Template strings
 $string['blockdescription'] = 'Erstellen Sie geführte Touren für Ihren Kurs, um Studenten bei der Navigation und dem Verständnis der Kursinhalte zu helfen.';
 $string['existingtours'] = 'Vorhandene Touren';
-$string['createnewtour'] = 'Neue Tour erstellen';
+$string['createnewtour'] = 'Tour erstellen';
+$string['createnewstickytour'] = 'Sticky Tour erstellen';
 $string['managetours'] = 'Touren verwalten';
 $string['creatingtour'] = 'Neue Tour erstellen';
 $string['tourinstructions'] = 'Klicken Sie auf Kurselemente, um sie als Tour-Schritte hinzuzufügen, und fügen Sie dann Texte für jeden Schritt hinzu.';
@@ -62,6 +63,9 @@ $string['addstep'] = 'Schritt hinzufügen';
 $string['preview'] = 'Vorschau';
 $string['currentlyediting'] = 'Aktuelles Ziel';
 $string['clearselection'] = 'Auswahl löschen';
+$string['selectplacement'] = 'Positionierung auswählen';
+$string['selectedplacement'] = 'Positionierung ausgewählt';
+$string['touravailable'] = 'Tour verfügbar';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
 
