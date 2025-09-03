@@ -179,8 +179,8 @@ class manager {
         global $DB;
 
         // Get all tours from the database.
-        $sql = "SELECT * FROM {tool_usertours_tours} 
-                WHERE name LIKE :prefix 
+        $sql = "SELECT * FROM {tool_usertours_tours}
+                WHERE name LIKE :prefix
                 AND pathmatch LIKE :pathmatch";
 
         $params = [
@@ -276,8 +276,8 @@ class manager {
         }
 
         // Set additional configurations.
-        $step->set_config('orphan', true); // Show even if target not found
-        $step->set_config('backdrop', true); // Show backdrop
+        $step->set_config('orphan', true); // Show even if target not found.
+        $step->set_config('backdrop', true); // Show backdrop.
 
         $step->persist();
 
@@ -376,7 +376,7 @@ class manager {
      * @return bool True if it's a teacher tour
      */
     private static function is_teacher_tour($tour) {
-        // Check by name prefix or config flag
+        // Check by name prefix or config flag.
         return strpos($tour->get_name(), self::TOUR_PREFIX) === 0
             || $tour->get_config('teacher_tour') === true;
     }
@@ -457,7 +457,7 @@ class manager {
         $tourdata = $data['tour'];
         $stepsdata = $data['steps'];
 
-        // Create tour record for tool_usertours_tours table
+        // Create tour record for tool_usertours_tours table.
         $tour = new \stdClass();
         $tour->name = $tourdata['name'];
         $tour->description = $tourdata['description'] ?? '';
@@ -492,9 +492,9 @@ class manager {
             // 2 = UNATTACHED (no specific target).
             $targetvalue = $stepdata['targetvalue'] ?? '';
 
-            // Ensure targetvalue has proper format for CSS selectors
+            // Ensure targetvalue has proper format for CSS selectors.
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
-                // Add # prefix if missing
+                // Add # prefix if missing.
                 $targetvalue = '#' . $targetvalue;
             }
 
@@ -533,7 +533,7 @@ class manager {
             return ['success' => false, 'error' => 'Invalid JSON structure'];
         }
 
-        // Check if tour exists
+        // Check if tour exists.
         if (!$DB->record_exists('tool_usertours_tours', ['id' => $tourid])) {
             return ['success' => false, 'error' => 'Tour not found'];
         }
@@ -541,7 +541,7 @@ class manager {
         $tourdata = $data['tour'];
         $stepsdata = $data['steps'];
 
-        // Update tour record
+        // Update tour record.
         $tour = new \stdClass();
         $tour->id = $tourid;
         $tour->name = $tourdata['name'];
@@ -558,7 +558,7 @@ class manager {
 
         $DB->update_record('tool_usertours_tours', $tour);
 
-        // Delete existing steps
+        // Delete existing steps.
         $DB->delete_records('tool_usertours_steps', ['tourid' => $tourid]);
 
         // Insert new steps
@@ -568,20 +568,20 @@ class manager {
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
 
-            // Handle targettype and targetvalue based on frontend selection
-            // In Moodle 5.0, targettype values are:
-            // 0 = SELECTOR (CSS selector like #module-123)
-            // 1 = BLOCK (block instance)
-            // 2 = UNATTACHED (no specific target)
+            // Handle targettype and targetvalue based on frontend selection.
+            // In Moodle 5.0, targettype values are:.
+            // 0 = SELECTOR (CSS selector like #module-123).
+            // 1 = BLOCK (block instance).
+            // 2 = UNATTACHED (no specific target).
             $targetvalue = $stepdata['targetvalue'] ?? '';
 
-            // Ensure targetvalue has proper format for CSS selectors
+            // Ensure targetvalue has proper format for CSS selectors.
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
-                // Add # prefix if missing
+                // Add # prefix if missing.
                 $targetvalue = '#' . $targetvalue;
             }
 
-            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
+            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0).
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
             $step->configdata = json_encode($stepdata['configdata'] ?? [
