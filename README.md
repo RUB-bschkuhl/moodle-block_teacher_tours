@@ -2,7 +2,7 @@
 CC-BY-SA 4.0
 
 ## What are Teacher Tours?
-The purpose of the Teacher Tours Block is to provide course intructors with the possibility to create user tours for their courses.
+The purpose of the Teacher Tours Block is to provide course instructors with the possibility to create user tours for their courses.
 
 What is included in the block are options to create and delete user tours for the specific course, add and delete new steps to the tour (including a title and description) and create and delete a single entry point for a specific tour in the form of a button that can be placed in the header or at the top of a section.
 
