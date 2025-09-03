@@ -62,7 +62,7 @@ class tour_api extends external_api {
                         'placement' => new external_value(PARAM_TEXT, 'Placement'),
                         'orphan' => new external_value(PARAM_TEXT, 'Orphan setting'),
                         'backdrop' => new external_value(PARAM_TEXT, 'Backdrop setting'),
-                        'reflex' => new external_value(PARAM_TEXT, 'Reflex setting')
+                        'reflex' => new external_value(PARAM_TEXT, 'Reflex setting'),
                     ])
                 ),
                 'name' => new external_value(PARAM_TEXT, 'Tour name'),
@@ -70,8 +70,9 @@ class tour_api extends external_api {
                 'pathmatch' => new external_value(PARAM_TEXT, 'Path match'),
                 'enabled' => new external_value(PARAM_TEXT, 'Enabled status'),
                 'filter_values' => new external_value(PARAM_TEXT, 'Filter values'),
-                'sortorder' => new external_value(PARAM_TEXT, 'Sort order')
-            ])
+                'sortorder' => new external_value(PARAM_TEXT, 'Sort order'),
+                'custom' => new external_value(PARAM_BOOL, 'Custom tour flag', VALUE_DEFAULT, false),
+            ]),
         ]);
     }
 
@@ -86,15 +87,15 @@ class tour_api extends external_api {
         global $DB, $CFG;
 
         $params = self::validate_parameters(self::save_tour_parameters(), [
-            'tour' => $tour
+            'tour' => $tour,
         ]);
 
         $tourdata = $params['tour'];
-        
+
         // Extract course ID from pathmatch
         preg_match('/id=(\d+)/', $tourdata['pathmatch'], $matches);
-        $courseid = isset($matches[1]) ? (int)$matches[1] : 0;
-        
+        $courseid = isset($matches[1]) ? (int) $matches[1] : 0;
+
         if (!$courseid) {
             throw new \invalid_parameter_exception('Invalid course ID in pathmatch');
         }
@@ -110,69 +111,96 @@ class tour_api extends external_api {
         $toursave->description = $tourdata['description'];
         $toursave->pathmatch = $tourdata['pathmatch'];
         // Enable by default if not specified or empty
-        $toursave->enabled = (empty($tourdata['enabled']) || $tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
-        $toursave->sortorder = is_numeric($tourdata['sortorder']) ? (int)$tourdata['sortorder'] : 0;
-        
-        // Prepare configdata
+        $toursave->enabled =
+            (empty($tourdata['enabled']) || $tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
+        $toursave->sortorder = is_numeric($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 0;
+
+        // Check if this is a custom tour
+        $iscustom = isset($tourdata['custom']) && $tourdata['custom'];
+        $iscustom = true;
+
+        // Prepare configdata.
         $configdata = [
             'courseid' => $courseid,
-            'teacher_tour' => true
+            'teacher_tour' => true,
         ];
         $toursave->configdata = json_encode($configdata);
-        
+
+        // Handle differently based on custom flag.
+        if ($iscustom) {
+            // For custom tours, store only in block_teacher_tours table
+            $customsave = new \stdClass();
+            $customsave->rawdata = json_encode($toursave);
+            $tourid = $DB->insert_record('block_teacher_tours', $customsave);
+
+            if (!$tourid) {
+                return [
+                    'success' => false,
+                    'tourid' => 0,
+                    'message' => 'Failed to create custom tour',
+                ];
+            }
+
+            return [
+                'success' => true,
+                'tourid' => $tourid,
+                'message' => 'Custom tour created successfully',
+            ];
+        }
+
         // Insert tour into database
         $tourid = $DB->insert_record('tool_usertours_tours', $toursave);
-        
+
         if (!$tourid) {
             return [
                 'success' => false,
                 'tourid' => 0,
-                'message' => 'Failed to create tour'
+                'message' => 'Failed to create tour',
             ];
         }
-        
+
         // Insert steps
         foreach ($tourdata['steps'] as $index => $step) {
             $stepsave = new \stdClass();
             $stepsave->tourid = $tourid;
             $stepsave->title = $step['title'] ?? '';
             $stepsave->content = $step['content'] ?? '';
-            
+
             // Convert targettype from string to int (frontend sends "2" but we want 0 for SELECTOR)
             // targettype: 0 = SELECTOR, 1 = BLOCK, 2 = UNATTACHED
             $stepsave->targettype = 0; // Always use 0 for CSS selectors
-            
+
             // Ensure targetvalue has proper format
             $targetvalue = $step['targetvalue'] ?? '';
-            if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
+            if (!empty($targetvalue) && !str_starts_with($targetvalue, '#')) {
                 $targetvalue = '#' . $targetvalue;
             }
             $stepsave->targetvalue = $targetvalue;
-            
+
             $stepsave->sortorder = $index;
-            
+
             // Prepare step configdata
             $stepconfig = [
                 'placement' => $step['placement'] ?? 'bottom',
                 'orphan' => ($step['orphan'] === 'true'),
                 'backdrop' => ($step['backdrop'] === 'true'),
-                'reflex' => ($step['reflex'] === 'true')
+                'reflex' => ($step['reflex'] === 'true'),
             ];
             $stepsave->configdata = json_encode($stepconfig);
-            
+
             $DB->insert_record('tool_usertours_steps', $stepsave);
         }
-        
+
         // Reset tour for all users so it's immediately visible.
         // Use Moodle's built-in method to mark a major change which resets tour state for all users.
         require_once($CFG->dirroot . '/admin/tool/usertours/classes/tour.php');
         $tour = \tool_usertours\tour::instance($tourid);
         $tour?->mark_major_change();
-        
+
         return [
             'success' => true,
             'tourid' => $tourid,
-            'message' => 'Tour created successfully'
+            'message' => 'Tour created successfully',
         ];
     }
 
@@ -185,7 +213,7 @@ class tour_api extends external_api {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'tourid' => new external_value(PARAM_INT, 'Tour ID'),
-            'message' => new external_value(PARAM_TEXT, 'Response message')
+            'message' => new external_value(PARAM_TEXT, 'Response message'),
         ]);
     }
 
@@ -196,7 +224,7 @@ class tour_api extends external_api {
      */
     public static function get_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'tourid' => new external_value(PARAM_INT, 'Tour ID')
+            'tourid' => new external_value(PARAM_INT, 'Tour ID'),
         ]);
     }
 
@@ -210,7 +238,7 @@ class tour_api extends external_api {
     public static function get_tour(int $tourid): array {
 
         $params = self::validate_parameters(self::get_tour_parameters(), [
-            'tourid' => $tourid
+            'tourid' => $tourid,
         ]);
 
         $tour = manager::get_tour($params['tourid']);
@@ -220,7 +248,7 @@ class tour_api extends external_api {
 
         // Get formatted data for frontend
         $tourdata = manager::format_tour_for_frontend($tour);
-        
+
         // Check course context.
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
@@ -232,7 +260,7 @@ class tour_api extends external_api {
             'name' => $tourdata['name'],
             'description' => $tourdata['description'],
             'steps' => json_encode($tourdata['steps']),
-            'enabled' => $tourdata['enabled']
+            'enabled' => $tourdata['enabled'],
         ];
     }
 
@@ -248,7 +276,7 @@ class tour_api extends external_api {
             'name' => new external_value(PARAM_TEXT, 'Tour name'),
             'description' => new external_value(PARAM_TEXT, 'Tour description'),
             'steps' => new external_value(PARAM_RAW, 'JSON encoded steps'),
-            'enabled' => new external_value(PARAM_BOOL, 'Enabled status')
+            'enabled' => new external_value(PARAM_BOOL, 'Enabled status'),
         ]);
     }
 
@@ -260,7 +288,7 @@ class tour_api extends external_api {
     public static function get_course_tours_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
-            'enabledonly' => new external_value(PARAM_BOOL, 'Only return enabled tours', VALUE_DEFAULT, false)
+            'enabledonly' => new external_value(PARAM_BOOL, 'Only return enabled tours', VALUE_DEFAULT, false),
         ]);
     }
 
@@ -276,7 +304,7 @@ class tour_api extends external_api {
 
         $params = self::validate_parameters(self::get_course_tours_parameters(), [
             'courseid' => $courseid,
-            'enabledonly' => $enabledonly
+            'enabledonly' => $enabledonly,
         ]);
 
         // Check course context.
@@ -285,7 +313,7 @@ class tour_api extends external_api {
         require_capability('moodle/course:manageactivities', $context);
 
         $tours = manager::get_course_tours($params['courseid'], $params['enabledonly']);
-        
+
         $result = [];
         foreach ($tours as $tour) {
             $tourdata = manager::format_tour_for_frontend($tour);
@@ -295,7 +323,7 @@ class tour_api extends external_api {
                 'name' => $tourdata['name'],
                 'description' => $tourdata['description'],
                 'steps' => json_encode($tourdata['steps']),
-                'enabled' => $tourdata['enabled']
+                'enabled' => $tourdata['enabled'],
             ];
         }
 
@@ -315,7 +343,7 @@ class tour_api extends external_api {
                 'name' => new external_value(PARAM_TEXT, 'Tour name'),
                 'description' => new external_value(PARAM_TEXT, 'Tour description'),
                 'steps' => new external_value(PARAM_RAW, 'JSON encoded steps'),
-                'enabled' => new external_value(PARAM_BOOL, 'Enabled status')
+                'enabled' => new external_value(PARAM_BOOL, 'Enabled status'),
             ])
         );
     }
@@ -327,7 +355,7 @@ class tour_api extends external_api {
      */
     public static function delete_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'tourid' => new external_value(PARAM_INT, 'Tour ID')
+            'tourid' => new external_value(PARAM_INT, 'Tour ID'),
         ]);
     }
 
@@ -342,7 +370,7 @@ class tour_api extends external_api {
         global $DB;
 
         $params = self::validate_parameters(self::delete_tour_parameters(), [
-            'tourid' => $tourid
+            'tourid' => $tourid,
         ]);
 
         $tour = manager::get_tour($params['tourid']);
@@ -352,7 +380,7 @@ class tour_api extends external_api {
 
         // Get tour data for context check
         $tourdata = manager::format_tour_for_frontend($tour);
-        
+
         // Check course context.
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
@@ -370,7 +398,7 @@ class tour_api extends external_api {
      */
     public static function delete_tour_returns(): external_single_structure {
         return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'Success status')
+            'success' => new external_value(PARAM_BOOL, 'Success status'),
         ]);
     }
 
@@ -382,7 +410,7 @@ class tour_api extends external_api {
     public static function update_steps_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID'),
-            'steps' => new external_value(PARAM_RAW, 'JSON encoded steps array')
+            'steps' => new external_value(PARAM_RAW, 'JSON encoded steps array'),
         ]);
     }
 
@@ -398,7 +426,7 @@ class tour_api extends external_api {
 
         $params = self::validate_parameters(self::update_steps_parameters(), [
             'tourid' => $tourid,
-            'steps' => $steps
+            'steps' => $steps,
         ]);
 
         $tour = manager::get_tour($params['tourid']);
@@ -408,7 +436,7 @@ class tour_api extends external_api {
 
         // Get tour data for context check
         $tourdata = manager::format_tour_for_frontend($tour);
-        
+
         // Check course context.
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
@@ -422,7 +450,7 @@ class tour_api extends external_api {
         $stepsarray = $stepsarray ?? [];
 
         $success = manager::update_tour($params['tourid'], [
-            'steps' => $stepsarray
+            'steps' => $stepsarray,
         ]);
 
         return ['success' => $success];
@@ -435,7 +463,7 @@ class tour_api extends external_api {
      */
     public static function update_steps_returns(): external_single_structure {
         return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'Success status')
+            'success' => new external_value(PARAM_BOOL, 'Success status'),
         ]);
     }
 
@@ -446,7 +474,7 @@ class tour_api extends external_api {
      */
     public static function start_tour_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'tourid' => new external_value(PARAM_INT, 'Tour ID')
+            'tourid' => new external_value(PARAM_INT, 'Tour ID'),
         ]);
     }
 
@@ -460,7 +488,7 @@ class tour_api extends external_api {
     public static function start_tour(int $tourid): array {
 
         $params = self::validate_parameters(self::start_tour_parameters(), [
-            'tourid' => $tourid
+            'tourid' => $tourid,
         ]);
 
         $tour = manager::get_tour($params['tourid']);
@@ -470,22 +498,22 @@ class tour_api extends external_api {
 
         // Get tour data
         $tourdata = manager::format_tour_for_frontend($tour);
-        
+
         // Check course context - for starting a tour, we might want different permissions
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
-        
+
         // Teachers and students can view tours
         require_capability('moodle/course:view', $context);
 
         // Mark tour as started for this user (optional - depends on requirements)
         // This would use the core tour completion tracking
-        
+
         return [
             'id' => $tourdata['id'],
             'name' => $tourdata['name'],
             'description' => $tourdata['description'],
-            'steps' => json_encode($tourdata['steps'])
+            'steps' => json_encode($tourdata['steps']),
         ];
     }
 
@@ -499,10 +527,10 @@ class tour_api extends external_api {
             'id' => new external_value(PARAM_INT, 'Tour ID'),
             'name' => new external_value(PARAM_TEXT, 'Tour name'),
             'description' => new external_value(PARAM_TEXT, 'Tour description'),
-            'steps' => new external_value(PARAM_RAW, 'JSON encoded steps')
+            'steps' => new external_value(PARAM_RAW, 'JSON encoded steps'),
         ]);
     }
-    
+
     /**
      * Parameters for toggle_tour_enabled.
      *
@@ -511,14 +539,14 @@ class tour_api extends external_api {
     public static function toggle_tour_enabled_parameters(): external_function_parameters {
         return new external_function_parameters([
             'tourid' => new external_value(PARAM_INT, 'Tour ID'),
-            'enabled' => new external_value(PARAM_BOOL, 'Enabled status')
+            'enabled' => new external_value(PARAM_BOOL, 'Enabled status'),
         ]);
     }
-    
+
     /**
      * Toggle tour enabled/disabled status.
      *
-     * @param int $tourid Tour ID
+     * @param int $tourid   Tour ID
      * @param bool $enabled Whether tour should be enabled
      *
      * @return array Result with success status
@@ -526,32 +554,32 @@ class tour_api extends external_api {
     public static function toggle_tour_enabled(int $tourid, bool $enabled): array {
         $params = self::validate_parameters(self::toggle_tour_enabled_parameters(), [
             'tourid' => $tourid,
-            'enabled' => $enabled
+            'enabled' => $enabled,
         ]);
-        
+
         // Get the tour to check permissions
         $tour = manager::get_tour($params['tourid']);
         if (!$tour) {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
-        
+
         // Get tour data for context check
         $tourdata = manager::format_tour_for_frontend($tour);
-        
+
         // Check course context.
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
-        
+
         // Toggle the enabled status
         $success = manager::set_tour_enabled($params['tourid'], $params['enabled']);
-        
+
         return [
             'success' => $success,
-            'enabled' => $params['enabled']
+            'enabled' => $params['enabled'],
         ];
     }
-    
+
     /**
      * Return definition for toggle_tour_enabled.
      *
@@ -560,7 +588,8 @@ class tour_api extends external_api {
     public static function toggle_tour_enabled_returns(): external_single_structure {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
-            'enabled' => new external_value(PARAM_BOOL, 'New enabled status')
+            'enabled' => new external_value(PARAM_BOOL, 'New enabled status'),
         ]);
     }
+
 }
