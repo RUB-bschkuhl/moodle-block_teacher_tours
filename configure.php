@@ -27,10 +27,15 @@ require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
 $action = optional_param('action', \tool_usertours\manager::ACTION_LISTTOURS, PARAM_ALPHANUMEXT);
+// TODO: add required parameter -> id - meaning course id
+
+$courseid = 2;
+$url = new moodle_url('/blocks/teacher_tours/configure.php');
+$PAGE->set_context(context_course::instance($courseid = 2));
+$PAGE->set_url($url->out() );
 
 $pluginmanager = new \tool_usertours\manager();
-$PAGE->set_context(context_course::instance(2));
 
-$pluginmanager->execute(
+$pluginmanager->execute_generic(
     $action
 );

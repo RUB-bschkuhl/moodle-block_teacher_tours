@@ -32,7 +32,7 @@ class hook_callbacks {
     public static function secondary_extend(\core\hook\navigation\secondary_extend $hook): void {
         $secondarynav = $hook->get_secondaryview();
         $node = \navigation_node::create('[i18n-Todo] Teacher Blocks',
-                    new \moodle_url('/blocks/teacher_tours/configure.php', ['view' => '[i18n-Todo] Teacher Blocks']),
+                    new \moodle_url('/blocks/teacher_tours/configure.php'),
                     \navigation_node::TYPE_CONTAINER,
                     null,
                     'teachertours-1');
