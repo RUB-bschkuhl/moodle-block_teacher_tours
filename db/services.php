@@ -100,6 +100,17 @@ $functions = [
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_create_tour_from_custom' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'create_tour_from_custom',
+        'classpath'   => '',
+        'description' => 'Create a tour in Moodle core tables from a custom tour',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:manageactivities',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
     ]
 ];
 
@@ -112,7 +123,8 @@ $services = [
             'block_teacher_tours_delete_tour',
             'block_teacher_tours_update_steps',
             'block_teacher_tours_start_tour',
-            'block_teacher_tours_toggle_tour_enabled'
+            'block_teacher_tours_toggle_tour_enabled',
+            'block_teacher_tours_create_tour_from_custom'
         ],
         'restrictedusers' => 0,
         'enabled' => 1,

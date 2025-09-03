@@ -128,7 +128,10 @@ class tour_api extends external_api {
 
         // Handle differently based on custom flag.
         if ($iscustom) {
-            // For custom tours, store only in block_teacher_tours table
+            // For custom tours, store only in block_teacher_tours table,
+            // Include steps in the rawdata.
+            $toursave->steps = $tourdata['steps'];
+
             $customsave = new \stdClass();
             $customsave->rawdata = json_encode($toursave);
             $customsave->courseid = $courseid;
@@ -590,6 +593,169 @@ class tour_api extends external_api {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'enabled' => new external_value(PARAM_BOOL, 'New enabled status'),
+        ]);
+    }
+
+    /**
+     * Parameters for create_tour_from_custom.
+     *
+     * @return external_function_parameters
+     */
+    public static function create_tour_from_custom_parameters(): external_function_parameters {
+        return new external_function_parameters([
+            'courseid' => new external_value(PARAM_INT, 'Course ID'),
+        ]);
+    }
+
+    /**
+     * Create a tour in Moodle core tables from the first custom tour for a course.
+     * This fetches the first custom tour from block_teacher_tours table and creates
+     * it in tool_usertours_tours and tool_usertours_steps tables.
+     *
+     * @param int $courseid Course ID
+     *
+     * @return array Result with success status and tour ID
+     */
+    public static function create_tour_from_custom(int $courseid): array {
+        global $DB, $CFG, $USER;
+
+        $params = self::validate_parameters(self::create_tour_from_custom_parameters(), [
+            'courseid' => $courseid,
+        ]);
+
+        // Check course context.
+        $context = context_course::instance($params['courseid']);
+        self::validate_context($context);
+        require_capability('moodle/course:manageactivities', $context);
+
+        // Get the first custom tour for this course
+        $customtour = $DB->get_record('block_teacher_tours', ['courseid' => $params['courseid']], '*', IGNORE_MULTIPLE);
+
+        if (!$customtour) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'No custom tour found for this course',
+            ];
+        }
+
+        // Decode the raw data
+        $tourdata = json_decode($customtour->rawdata, true);
+        if (!$tourdata) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Invalid tour data in custom tour',
+            ];
+        }
+
+        // Check if the tour has steps
+        if (empty($tourdata['steps'])) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Custom tour has no steps defined',
+            ];
+        }
+
+        // Prepare tour data for core table
+        $coretour = new \stdClass();
+        $coretour->name = $tourdata['name'] ?? 'Teacher Tour';
+        $coretour->description = $tourdata['description'] ?? '';
+        $coretour->pathmatch = $tourdata['pathmatch'] ?? '/course/view.php%id=' . $params['courseid'];
+        $coretour->enabled = $tourdata['enabled'] ?? 1;
+        $coretour->sortorder = isset($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 0;
+
+        // Prepare configdata with cssselector filter
+        $configdata = [
+            'courseid' => $params['courseid'],
+            'teacher_tour' => true,
+            'custom_tour_id' => $customtour->id, // Reference to original custom tour
+            'filtervalues' => [
+                'cssselector' => ["#nav-notification-popover-container[data-userid=\"{$USER->id}\"]"]
+            ]
+        ];
+        $coretour->configdata = json_encode($configdata);
+
+        // Insert tour into core table
+        $tourid = $DB->insert_record('tool_usertours_tours', $coretour);
+
+        if (!$tourid) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Failed to create tour in core tables',
+            ];
+        }
+
+        // Insert steps into core table
+        $stepsinserted = 0;
+        foreach ($tourdata['steps'] as $index => $step) {
+            $corestep = new \stdClass();
+            $corestep->tourid = $tourid;
+            $corestep->title = $step['title'] ?? '';
+            $corestep->content = $step['content'] ?? '';
+
+            // Handle target type and value
+            if (isset($step['targettype'])) {
+                // Convert string to int if needed
+                if ($step['targettype'] === "2") {
+                    $corestep->targettype = 2; // UNATTACHED
+                } else {
+                    $corestep->targettype = 0; // SELECTOR (default)
+                }
+            } else {
+                $corestep->targettype = 0; // Default to SELECTOR
+            }
+
+            // Handle target value for CSS selectors
+            $targetvalue = $step['targetvalue'] ?? '';
+            if ($corestep->targettype === 0 && !empty($targetvalue)) {
+                // Ensure proper CSS selector format
+                if (!str_starts_with($targetvalue, '#') && !str_starts_with($targetvalue, '.')) {
+                    $targetvalue = '#' . $targetvalue;
+                }
+            }
+            $corestep->targetvalue = $targetvalue;
+
+            $corestep->sortorder = $index;
+
+            // Prepare step configdata
+            $stepconfig = [
+                'placement' => $step['placement'] ?? 'bottom',
+                'orphan' => isset($step['orphan']) && ($step['orphan'] === true || $step['orphan'] === 'true'),
+                'backdrop' => isset($step['backdrop']) && ($step['backdrop'] === true || $step['backdrop'] === 'true'),
+                'reflex' => isset($step['reflex']) && ($step['reflex'] === true || $step['reflex'] === 'true'),
+            ];
+            $corestep->configdata = json_encode($stepconfig);
+
+            if ($DB->insert_record('tool_usertours_steps', $corestep)) {
+                $stepsinserted++;
+            }
+        }
+
+        // Reset tour for all users so it's immediately visible
+        require_once($CFG->dirroot . '/admin/tool/usertours/classes/tour.php');
+        $tour = \tool_usertours\tour::instance($tourid);
+        $tour?->mark_major_change();
+
+        return [
+            'success' => true,
+            'tourid' => $tourid,
+            'message' => "Tour created successfully with {$stepsinserted} steps",
+        ];
+    }
+
+    /**
+     * Return definition for create_tour_from_custom.
+     *
+     * @return external_single_structure
+     */
+    public static function create_tour_from_custom_returns(): external_single_structure {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'Success status'),
+            'tourid' => new external_value(PARAM_INT, 'Created tour ID'),
+            'message' => new external_value(PARAM_TEXT, 'Result message'),
         ]);
     }
 
