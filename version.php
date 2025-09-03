@@ -25,11 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_teacher_tours';
-<<<<<<< Updated upstream
-$plugin->version = 2025090301;
-=======
 $plugin->version = 2025090305;
->>>>>>> Stashed changes
 $plugin->requires = 2025041400; // Moodle 5.0 .
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->supported = [500, 500]; // Moodle 5.0 .
