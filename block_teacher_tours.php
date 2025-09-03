@@ -58,6 +58,7 @@ class block_teacher_tours extends block_base
 
         //TODO get all tours for the current context instead of only course
         $tours = $this->get_all_tours_for_course($this->page->course->id);
+        $customtours = $this->get_all_custom_tours_for_course($this->page->course->id);
 
         if (has_capability('block/teacher_tours:view', $context)) {
             $this->content->text = '[Content visible to teachers]';
@@ -73,6 +74,11 @@ class block_teacher_tours extends block_base
         if (!empty($tours)) {
             $templatedata['existing_tours'] = [
                 'tours' => array_values($tours)
+            ];
+        }
+        if (!empty($customtours)) {
+            $templatedata['existing_custom_tours'] = [
+                'tours' => array_values($customtours)
             ];
         }
         
@@ -105,6 +111,19 @@ class block_teacher_tours extends block_base
     }
 
     /**
+     * Get all tours for the current course
+     *
+     * @param int $courseid
+     * @return array
+     */
+    public function get_all_custom_tours_for_course($courseid)
+    {
+        global $DB;
+        $tours = $DB->get_records('block_teacher_tours', ['courseid' => $courseid]);
+        return $tours;
+    }
+
+    /**
      * Add required JavaScript.
      *
      * @return void
@@ -114,8 +133,9 @@ class block_teacher_tours extends block_base
         global $PAGE;
 
         $courseid = $this->page->course->id;
+        $customtours = $this->get_all_custom_tours_for_course($courseid);
         if ($courseid != SITEID) {
-            $PAGE->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid]);
+            $PAGE->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid, $customtours]);
         }
 
     }
