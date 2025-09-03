@@ -620,7 +620,7 @@ class tour_api extends external_api {
      * @return array Result with success status and tour ID
      */
     public static function create_tour_from_custom(int $courseid): array {
-        //TODO replace courseid with custom tour id from plugin table
+        // TODO replace courseid with custom tour id from plugin table.
         global $DB, $CFG, $USER;
 
         $params = self::validate_parameters(self::create_tour_from_custom_parameters(), [
@@ -706,7 +706,7 @@ class tour_api extends external_api {
                 if ($step['targettype'] === "2") {
                     $corestep->targettype = 2; // UNATTACHED.
                 } else {
-                    $corestep->targettype = 0; // SELECTOR (default).
+                    $corestep->targettype = 0; // default.
                 }
             } else {
                 $corestep->targettype = 0; // Default to SELECTOR.
