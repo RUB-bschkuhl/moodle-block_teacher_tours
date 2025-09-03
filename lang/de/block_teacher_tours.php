@@ -69,3 +69,9 @@ $string['touravailable'] = 'Tour verfügbar';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
 
+// Settings.
+$string['modulehighlight'] = 'Highlight Farbe für Module';
+$string['modulehighlight_desc'] = 'Farbe mit der für das CSS Auswahl Werkzeug Module hinterlegt werden.';
+
+$string['sectionhighlight'] = 'Highlight Farbe für Abschnitte';
+$string['sectionhighlight_desc'] = 'Farbe mit der für das CSS Auswahl Werkzeug Abschnitte hinterlegt werden.';

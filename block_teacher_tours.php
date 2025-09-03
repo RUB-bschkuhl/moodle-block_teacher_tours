@@ -131,6 +131,17 @@ class block_teacher_tours extends block_base
     public function get_required_javascript()
     {
         global $PAGE;
+        $modulecolor = get_config('block_teacher_tours', 'modulehighlight');
+        $sectioncolor = get_config('block_teacher_tours', 'sectionhighlight');
+
+        
+        $PAGE->requires->js_init_code("
+            window.teachertoursColors = {
+                moduleHighlight: '{$modulecolor}',
+                sectionHighlight: '{$sectioncolor}'
+            };
+        ");
+
 
         $courseid = $this->page->course->id;
         $customtours = $this->get_all_custom_tours_for_course($courseid);
