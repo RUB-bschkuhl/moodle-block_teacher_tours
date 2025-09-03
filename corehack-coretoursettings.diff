@@ -1,0 +1,43 @@
+diff --git a/admin/tool/usertours/classes/manager.php b/admin/tool/usertours/classes/manager.php
+index ffc0b70a2c5..fbd1e66b9ed 100644
+--- a/admin/tool/usertours/classes/manager.php
++++ b/admin/tool/usertours/classes/manager.php
+@@ -151,7 +151,15 @@ class manager {
+         global $PAGE;
+         $this->setup_admin_externalpage($action);
+         $PAGE->set_primary_active_tab('siteadminnode');
++        $this->execute_generic($action);
++    }
+ 
++    /**
++     * This is the entry point for this controller class.
++     *
++     * @param   string  $action     The action to perform.
++     */
++    public function execute_generic($action): void {
+         // Add the main content.
+         switch ($action) {
+             case self::ACTION_NEWTOUR:
+diff --git a/admin/tool/usertours/lib.php b/admin/tool/usertours/lib.php
+index 8f170034591..8b3132a5d61 100644
+--- a/admin/tool/usertours/lib.php
++++ b/admin/tool/usertours/lib.php
+@@ -34,7 +34,18 @@ use tool_usertours\helper;
+  * @return \core\output\inplace_editable
+  */
+ function tool_usertours_inplace_editable($itemtype, $itemid, $newvalue) {
++    global $PAGE, $SESSION;
++    $url = $_SERVER['HTTP_REFERER'];
+     $context = \context_system::instance();
++    // TODO: add parameter to configure an load it here from referer.
++    $courseid = 2;
++    if (str_contains($url, 'teacher_tours/configure.php')) {
++        // Load the item.
++        $checktour = helper::get_tour($itemid);
++        if (str_contains($checktour->get_pathmatch(), '/course/view.php?id=' . $courseid)) {
++            $context = \context_course::instance($courseid);
++        }
++    }
+     external_api::validate_context($context);
+     require_capability('tool/usertours:managetours', $context);
+ 
