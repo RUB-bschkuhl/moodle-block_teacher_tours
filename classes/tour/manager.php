@@ -561,7 +561,7 @@ class manager {
         // Delete existing steps.
         $DB->delete_records('tool_usertours_steps', ['tourid' => $tourid]);
 
-        // Insert new steps
+        // Insert new steps.
         foreach ($stepsdata as $index => $stepdata) {
             $step = new \stdClass();
             $step->tourid = $tourid;
@@ -610,15 +610,15 @@ class manager {
     public static function delete_tour_by_id($tourid) {
         global $DB;
 
-        // Check if tour exists
+        // Check if tour exists.
         if (!$DB->record_exists('tool_usertours_tours', ['id' => $tourid])) {
             return ['success' => false, 'error' => 'Tour not found'];
         }
 
-        // Delete steps first
+        // Delete steps first.
         $DB->delete_records('tool_usertours_steps', ['tourid' => $tourid]);
 
-        // Delete tour
+        // Delete tour.
         $DB->delete_records('tool_usertours_tours', ['id' => $tourid]);
 
         return ['success' => true];
