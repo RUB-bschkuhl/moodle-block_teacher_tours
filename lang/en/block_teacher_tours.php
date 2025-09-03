@@ -68,4 +68,3 @@ $string['selectedplacement'] = 'Selected placement';
 $string['touravailable'] = 'Tour available';
 
 $string['privacy:metadata'] = 'The teacher tours block does not store any personal data.';
-

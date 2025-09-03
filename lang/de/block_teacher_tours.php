@@ -68,4 +68,3 @@ $string['selectedplacement'] = 'Positionierung ausgewählt';
 $string['touravailable'] = 'Tour verfügbar';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
-

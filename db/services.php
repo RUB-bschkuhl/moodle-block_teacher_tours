@@ -33,9 +33,9 @@ $functions = [
         'type'        => 'write',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_get_tour' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'get_tour',
@@ -44,9 +44,9 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_get_course_tours' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'get_course_tours',
@@ -55,9 +55,9 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_delete_tour' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'delete_tour',
@@ -66,9 +66,9 @@ $functions = [
         'type'        => 'write',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_update_steps' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'update_steps',
@@ -77,9 +77,9 @@ $functions = [
         'type'        => 'write',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_start_tour' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'start_tour',
@@ -88,9 +88,9 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
         'capabilities' => 'moodle/course:view',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
-    
+
     'block_teacher_tours_toggle_tour_enabled' => [
         'classname'   => 'block_teacher_tours\external\tour_api',
         'methodname'  => 'toggle_tour_enabled',
@@ -99,8 +99,8 @@ $functions = [
         'type'        => 'write',
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
-        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
-    ]
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
 ];
 
 $services = [
@@ -112,10 +112,10 @@ $services = [
             'block_teacher_tours_delete_tour',
             'block_teacher_tours_update_steps',
             'block_teacher_tours_start_tour',
-            'block_teacher_tours_toggle_tour_enabled'
+            'block_teacher_tours_toggle_tour_enabled',
         ],
         'restrictedusers' => 0,
         'enabled' => 1,
-        'shortname' => 'teacher_tours_service'
-    ]
+        'shortname' => 'teacher_tours_service',
+    ],
 ];

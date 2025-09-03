@@ -40,7 +40,6 @@ use tool_usertours\step;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
-
     /** @var string Prefix for teacher tours to distinguish them from system tours */
     const TOUR_PREFIX = 'teacher_tour_';
 
@@ -79,7 +78,7 @@ class manager {
                 self::add_step_to_tour($tour, $stepdata);
             }
         }
-        
+
         // Reset tour for all users so it's immediately visible
         $tour->mark_major_change();
 
@@ -486,20 +485,20 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            
+
             // Handle targettype and targetvalue based on frontend selection
             // In Moodle 5.0, targettype values are:
             // 0 = SELECTOR (CSS selector like #module-123)
             // 1 = BLOCK (block instance)
             // 2 = UNATTACHED (no specific target)
             $targetvalue = $stepdata['targetvalue'] ?? '';
-            
+
             // Ensure targetvalue has proper format for CSS selectors
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
                 // Add # prefix if missing
                 $targetvalue = '#' . $targetvalue;
             }
-            
+
             $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
@@ -511,7 +510,7 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
-        
+
         // Reset tour for all users so it's immediately visible.
         $tour = tour::instance($tourid);
         $tour?->mark_major_change();
@@ -569,20 +568,20 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            
+
             // Handle targettype and targetvalue based on frontend selection
             // In Moodle 5.0, targettype values are:
             // 0 = SELECTOR (CSS selector like #module-123)
             // 1 = BLOCK (block instance)
             // 2 = UNATTACHED (no specific target)
             $targetvalue = $stepdata['targetvalue'] ?? '';
-            
+
             // Ensure targetvalue has proper format for CSS selectors
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
                 // Add # prefix if missing
                 $targetvalue = '#' . $targetvalue;
             }
-            
+
             $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
@@ -594,7 +593,7 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
-        
+
         // Reset tour for all users so the updated tour is immediately visible
         $tour = tour::instance($tourid);
         $tour?->mark_major_change();
@@ -668,5 +667,4 @@ class manager {
             'enabled' => $tour->is_enabled(),
         ];
     }
-
 }
