@@ -94,7 +94,7 @@ class tour_api extends external_api {
 
         $tourdata = $params['tour'];
 
-        // Extract course ID from pathmatch
+        // Extract course ID from pathmatch.
         preg_match('/id=(\d+)/', $tourdata['pathmatch'], $matches);
         $courseid = isset($matches[1]) ? (int) $matches[1] : 0;
 
@@ -107,17 +107,17 @@ class tour_api extends external_api {
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        // Prepare tour data for database
+        // Prepare tour data for database.
         $toursave = new \stdClass();
         $toursave->name = $tourdata['name'];
         $toursave->description = $tourdata['description'];
         $toursave->pathmatch = $tourdata['pathmatch'];
-        // Enable by default if not specified or empty
+        // Enable by default if not specified or empty.
         $toursave->enabled =
             (empty($tourdata['enabled']) || $tourdata['enabled'] === 'true' || $tourdata['enabled'] === '1') ? 1 : 0;
         $toursave->sortorder = is_numeric($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 0;
 
-        // Check if this is a custom tour
+        // Check if this is a custom tour.
         $iscustom = isset($tourdata['custom']) && $tourdata['custom'];
 
         // Prepare configdata.
@@ -156,7 +156,7 @@ class tour_api extends external_api {
             ];
         }
 
-        // Insert tour into database
+        // Insert tour into database.
         $tourid = $DB->insert_record('tool_usertours_tours', $toursave);
 
         if (!$tourid) {
@@ -167,18 +167,18 @@ class tour_api extends external_api {
             ];
         }
 
-        // Insert steps
+        // Insert steps.
         foreach ($tourdata['steps'] as $index => $step) {
             $stepsave = new \stdClass();
             $stepsave->tourid = $tourid;
             $stepsave->title = $step['title'] ?? '';
             $stepsave->content = $step['content'] ?? '';
 
-            // Convert targettype from string to int (frontend sends "2" but we want 0 for SELECTOR)
-            // targettype: 0 = SELECTOR, 1 = BLOCK, 2 = UNATTACHED
-            $stepsave->targettype = 0; // Always use 0 for CSS selectors
+            // Convert targettype from string to int (frontend sends "2" but we want 0 for SELECTOR).
+            // targettype: 0 = SELECTOR, 1 = BLOCK, 2 = UNATTACHED.
+            $stepsave->targettype = 0; // Always use 0 for CSS selectors.
 
-            // Ensure targetvalue has proper format
+            // Ensure targetvalue has proper format.
             $targetvalue = $step['targetvalue'] ?? '';
             if (!empty($targetvalue) && !str_starts_with($targetvalue, '#')) {
                 $targetvalue = '#' . $targetvalue;
@@ -187,7 +187,7 @@ class tour_api extends external_api {
 
             $stepsave->sortorder = $index;
 
-            // Prepare step configdata
+            // Prepare step configdata.
             $stepconfig = [
                 'placement' => $step['placement'] ?? 'bottom',
                 'orphan' => ($step['orphan'] === 'true'),
@@ -254,7 +254,7 @@ class tour_api extends external_api {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
 
-        // Get formatted data for frontend
+        // Get formatted data for frontend.
         $tourdata = manager::format_tour_for_frontend($tour);
 
         // Check course context.
@@ -375,7 +375,6 @@ class tour_api extends external_api {
      * @return array Result
      */
     public static function delete_tour(int $tourid): array {
-        global $DB;
 
         $params = self::validate_parameters(self::delete_tour_parameters(), [
             'tourid' => $tourid,
@@ -386,7 +385,7 @@ class tour_api extends external_api {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
 
-        // Get tour data for context check
+        // Get tour data for context check.
         $tourdata = manager::format_tour_for_frontend($tour);
 
         // Check course context.
@@ -442,7 +441,7 @@ class tour_api extends external_api {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
 
-        // Get tour data for context check
+        // Get tour data for context check.
         $tourdata = manager::format_tour_for_frontend($tour);
 
         // Check course context.
@@ -504,18 +503,18 @@ class tour_api extends external_api {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
 
-        // Get tour data
+        // Get tour data.
         $tourdata = manager::format_tour_for_frontend($tour);
 
-        // Check course context - for starting a tour, we might want different permissions
+        // Check course context - for starting a tour, we might want different permissions.
         $context = context_course::instance($tourdata['courseid']);
         self::validate_context($context);
 
-        // Teachers and students can view tours
+        // Teachers and students can view tours.
         require_capability('moodle/course:view', $context);
 
-        // Mark tour as started for this user (optional - depends on requirements)
-        // This would use the core tour completion tracking
+        // Mark tour as started for this user (optional - depends on requirements).
+        // This would use the core tour completion tracking.
 
         return [
             'id' => $tourdata['id'],
@@ -565,13 +564,13 @@ class tour_api extends external_api {
             'enabled' => $enabled,
         ]);
 
-        // Get the tour to check permissions
+        // Get the tour to check permissions.
         $tour = manager::get_tour($params['tourid']);
         if (!$tour) {
             throw new \moodle_exception('tournotfound', 'block_teacher_tours');
         }
 
-        // Get tour data for context check
+        // Get tour data for context check.
         $tourdata = manager::format_tour_for_frontend($tour);
 
         // Check course context.
@@ -579,7 +578,7 @@ class tour_api extends external_api {
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        // Toggle the enabled status
+        // Toggle the enabled status.
         $success = manager::set_tour_enabled($params['tourid'], $params['enabled']);
 
         return [
@@ -633,7 +632,7 @@ class tour_api extends external_api {
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        // Get the first custom tour for this course
+        // Get the first custom tour for this course.
         $customtour = $DB->get_record('block_teacher_tours', ['courseid' => $params['courseid']], '*', IGNORE_MULTIPLE);
 
         if (!$customtour) {
@@ -644,7 +643,7 @@ class tour_api extends external_api {
             ];
         }
 
-        // Decode the raw data
+        // Decode the raw data.
         $tourdata = json_decode($customtour->rawdata, true);
         if (!$tourdata) {
             return [
@@ -654,7 +653,7 @@ class tour_api extends external_api {
             ];
         }
 
-        // Check if the tour has steps
+        // Check if the tour has steps.
         if (empty($tourdata['steps'])) {
             return [
                 'success' => false,
@@ -663,7 +662,7 @@ class tour_api extends external_api {
             ];
         }
 
-        // Prepare tour data for core table
+        // Prepare tour data for core table.
         $coretour = new \stdClass();
         $coretour->name = $tourdata['name'] ?? 'Teacher Tour';
         $coretour->description = $tourdata['description'] ?? '';
@@ -671,18 +670,18 @@ class tour_api extends external_api {
         $coretour->enabled = $tourdata['enabled'] ?? 1;
         $coretour->sortorder = isset($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 0;
 
-        // Prepare configdata with cssselector filter
+        // Prepare configdata with cssselector filter.
         $configdata = [
             'courseid' => $params['courseid'],
             'teacher_tour' => true,
-            'custom_tour_id' => $customtour->id, // Reference to original custom tour
+            'custom_tour_id' => $customtour->id, // Reference to original custom tour.
             'filtervalues' => [
                 'cssselector' => ["#nav-notification-popover-container[data-userid=\"{$USER->id}\"]"],
             ],
         ];
         $coretour->configdata = json_encode($configdata);
 
-        // Insert tour into core table
+        // Insert tour into core table.
         $tourid = $DB->insert_record('tool_usertours_tours', $coretour);
 
         if (!$tourid) {
@@ -693,7 +692,7 @@ class tour_api extends external_api {
             ];
         }
 
-        // Insert steps into core table
+        // Insert steps into core table.
         $stepsinserted = 0;
         foreach ($tourdata['steps'] as $index => $step) {
             $corestep = new \stdClass();
@@ -701,22 +700,22 @@ class tour_api extends external_api {
             $corestep->title = $step['title'] ?? '';
             $corestep->content = $step['content'] ?? '';
 
-            // Handle target type and value
+            // Handle target type and value.
             if (isset($step['targettype'])) {
-                // Convert string to int if needed
+                // Convert string to int if needed.
                 if ($step['targettype'] === "2") {
-                    $corestep->targettype = 2; // UNATTACHED
+                    $corestep->targettype = 2; // UNATTACHED.
                 } else {
-                    $corestep->targettype = 0; // SELECTOR (default)
+                    $corestep->targettype = 0; // SELECTOR (default).
                 }
             } else {
-                $corestep->targettype = 0; // Default to SELECTOR
+                $corestep->targettype = 0; // Default to SELECTOR.
             }
 
-            // Handle target value for CSS selectors
+            // Handle target value for CSS selectors.
             $targetvalue = $step['targetvalue'] ?? '';
             if ($corestep->targettype === 0 && !empty($targetvalue)) {
-                // Ensure proper CSS selector format
+                // Ensure proper CSS selector format.
                 if (!str_starts_with($targetvalue, '#') && !str_starts_with($targetvalue, '.')) {
                     $targetvalue = '#' . $targetvalue;
                 }
@@ -725,7 +724,7 @@ class tour_api extends external_api {
 
             $corestep->sortorder = $index;
 
-            // Prepare step configdata
+            // Prepare step configdata.
             $stepconfig = [
                 'placement' => $step['placement'] ?? 'bottom',
                 'orphan' => isset($step['orphan']) && ($step['orphan'] === true || $step['orphan'] === 'true'),
@@ -739,7 +738,7 @@ class tour_api extends external_api {
             }
         }
 
-        // Reset tour for all users so it's immediately visible
+        // Reset tour for all users so it's immediately visible.
         require_once($CFG->dirroot . '/admin/tool/usertours/classes/tour.php');
         $tour = \tool_usertours\tour::instance($tourid);
         $tour?->mark_major_change();
@@ -748,7 +747,7 @@ class tour_api extends external_api {
             'success' => true,
             'tourid' => $tourid,
             'message' => "Tour created successfully with {$stepsinserted} steps",
-            'reload' => true,  // Signal the frontend to reload the page
+            'reload' => true,  // Signal the frontend to reload the page.
         ];
     }
 
