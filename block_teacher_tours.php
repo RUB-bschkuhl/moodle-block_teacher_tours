@@ -53,7 +53,7 @@ class block_teacher_tours extends block_base {
         // Check if user has permission to view this block.
         $context = context_block::instance($this->instance->id);
 
-        //TODO get all tours for the current context instead of only course
+        // TODO get all tours for the current context instead of only course.
         $tours = $this->get_all_tours_for_course($this->page->course->id);
         $customtours = $this->get_all_custom_tours_for_course($this->page->course->id);
 
@@ -127,12 +127,11 @@ class block_teacher_tours extends block_base {
      * @return void
      */
     public function get_required_javascript() {
-        global $PAGE;
 
         $courseid = $this->page->course->id;
         $customtours = $this->get_all_custom_tours_for_course($courseid);
         if ($courseid != SITEID) {
-            $PAGE->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid, $customtours]);
+            $this->page->requires->js_call_amd('block_teacher_tours/teacher_tours', 'init', [$courseid, $customtours]);
         }
 
     }

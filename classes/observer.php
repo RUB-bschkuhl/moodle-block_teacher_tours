@@ -24,8 +24,6 @@
 
 namespace block_teacher_tours;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Event observer class
  *

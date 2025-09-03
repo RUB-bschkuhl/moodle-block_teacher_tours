@@ -24,8 +24,6 @@
 
 namespace block_teacher_tours\tour;
 
-defined('MOODLE_INTERNAL') || die();
-
 use tool_usertours\tour;
 use tool_usertours\step;
 
@@ -62,25 +60,25 @@ class manager {
         $tour->set_pathmatch('/course/view.php?id=' . $courseid);
         $tour->set_enabled(tour::ENABLED);
 
-        // Store course ID in config for filtering
+        // Store course ID in config for filtering.
         $tour->set_config('courseid', $courseid);
         $tour->set_config('teacher_tour', true);
 
-        // Set display options
+        // Set display options.
         $tour->set_config('displaystepnumbers', true);
         $tour->set_config('showtourwhen', tour::SHOW_TOUR_ON_EACH_PAGE_VISIT);
 
-        // Save the tour
+        // Save the tour.
         $tour->persist();
 
-        // Add steps if provided
+        // Add steps if provided.
         if (!empty($steps)) {
             foreach ($steps as $stepdata) {
                 self::add_step_to_tour($tour, $stepdata);
             }
         }
-        
-        // Reset tour for all users so it's immediately visible
+
+        // Reset tour for all users so it's immediately visible.
         $tour->mark_major_change();
 
         return $tour->get_id();
@@ -101,7 +99,7 @@ class manager {
         }
 
         if (isset($data['name'])) {
-            // Ensure teacher tour prefix is maintained
+            // Ensure teacher tour prefix is maintained.
             $name = $data['name'];
             if (!str_starts_with($name, self::TOUR_PREFIX)) {
                 $name = self::TOUR_PREFIX . $name;
@@ -486,20 +484,20 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            
+
             // Handle targettype and targetvalue based on frontend selection
             // In Moodle 5.0, targettype values are:
             // 0 = SELECTOR (CSS selector like #module-123)
             // 1 = BLOCK (block instance)
             // 2 = UNATTACHED (no specific target)
             $targetvalue = $stepdata['targetvalue'] ?? '';
-            
+
             // Ensure targetvalue has proper format for CSS selectors
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
                 // Add # prefix if missing
                 $targetvalue = '#' . $targetvalue;
             }
-            
+
             $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
@@ -511,7 +509,7 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
-        
+
         // Reset tour for all users so it's immediately visible.
         $tour = tour::instance($tourid);
         $tour?->mark_major_change();
@@ -569,20 +567,20 @@ class manager {
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
-            
+
             // Handle targettype and targetvalue based on frontend selection
             // In Moodle 5.0, targettype values are:
             // 0 = SELECTOR (CSS selector like #module-123)
             // 1 = BLOCK (block instance)
             // 2 = UNATTACHED (no specific target)
             $targetvalue = $stepdata['targetvalue'] ?? '';
-            
+
             // Ensure targetvalue has proper format for CSS selectors
             if (!empty($targetvalue) && strpos($targetvalue, '#') !== 0) {
                 // Add # prefix if missing
                 $targetvalue = '#' . $targetvalue;
             }
-            
+
             $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
@@ -594,7 +592,7 @@ class manager {
 
             $DB->insert_record('tool_usertours_steps', $step);
         }
-        
+
         // Reset tour for all users so the updated tour is immediately visible
         $tour = tour::instance($tourid);
         $tour?->mark_major_change();
