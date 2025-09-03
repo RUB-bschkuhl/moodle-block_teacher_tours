@@ -25,14 +25,12 @@
 /**
  * Example block class
  */
-class block_teacher_tours extends block_base
-{
+class block_teacher_tours extends block_base {
 
     /**
      * Initialize the block
      */
-    public function init()
-    {
+    public function init() {
         $this->title = get_string('pluginname', 'block_teacher_tours');
     }
 
@@ -41,8 +39,7 @@ class block_teacher_tours extends block_base
      *
      * @return stdClass The block content
      */
-    public function get_content()
-    {
+    public function get_content() {
         global $OUTPUT;
 
         if ($this->content !== null) {
@@ -68,20 +65,20 @@ class block_teacher_tours extends block_base
             return $this->content;
         }
 
-        // Main block content
-        // Structure data for template
+        // Main block content.
+        // Structure data for template.
         $templatedata = [];
         if (!empty($tours)) {
             $templatedata['existing_tours'] = [
-                'tours' => array_values($tours)
+                'tours' => array_values($tours),
             ];
         }
         if (!empty($customtours)) {
             $templatedata['existing_custom_tours'] = [
-                'tours' => array_values($customtours)
+                'tours' => array_values($customtours),
             ];
         }
-        
+
         $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', $templatedata);
 
         return $this->content;
@@ -92,8 +89,7 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function instance_allow_multiple()
-    {
+    public function instance_allow_multiple() {
         return false;
     }
 
@@ -101,12 +97,13 @@ class block_teacher_tours extends block_base
      * Get all tours for the current course
      *
      * @param int $courseid
+     *
      * @return array
      */
-    public function get_all_tours_for_course($courseid)
-    {
+    public function get_all_tours_for_course($courseid) {
         global $DB;
         $tours = $DB->get_records('tool_usertours_tours', ['pathmatch' => '/course/view.php?id=' . $courseid]);
+
         return $tours;
     }
 
@@ -114,12 +111,13 @@ class block_teacher_tours extends block_base
      * Get all tours for the current course
      *
      * @param int $courseid
+     *
      * @return array
      */
-    public function get_all_custom_tours_for_course($courseid)
-    {
+    public function get_all_custom_tours_for_course($courseid) {
         global $DB;
         $tours = $DB->get_records('block_teacher_tours', ['courseid' => $courseid]);
+
         return $tours;
     }
 
@@ -128,8 +126,7 @@ class block_teacher_tours extends block_base
      *
      * @return void
      */
-    public function get_required_javascript()
-    {
+    public function get_required_javascript() {
         global $PAGE;
 
         $courseid = $this->page->course->id;
@@ -145,8 +142,7 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function has_config()
-    {
+    public function has_config() {
         return true;
     }
 
@@ -155,8 +151,7 @@ class block_teacher_tours extends block_base
      *
      * @return array
      */
-    public function applicable_formats()
-    {
+    public function applicable_formats() {
         return [
             'course-view' => true,
         ];
@@ -167,8 +162,8 @@ class block_teacher_tours extends block_base
      *
      * @return bool
      */
-    public function instance_allow_config()
-    {
+    public function instance_allow_config() {
         return true;
     }
+
 }

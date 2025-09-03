@@ -24,12 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// phpcs:disable moodle.Files.LangFilesOrdering.UnexpectedComment
+// phpcs:disable moodle.Files.LangFilesOrdering.IncorrectOrder
+
 $string['pluginname'] = 'Lehrer Touren';
 $string['teacher_tours:addinstance'] = 'Einen neuen Lehrer Touren Block hinzufügen';
 $string['teacher_tours:myaddinstance'] = 'Einen neuen Lehrer Touren Block zum Dashboard hinzufügen';
 $string['teacher_tours:view'] = 'Den Lehrer Touren Block anzeigen';
 
-// Template strings
+// Template strings.
 $string['blockdescription'] = 'Erstellen Sie geführte Touren für Ihren Kurs, um Studenten bei der Navigation und dem Verständnis der Kursinhalte zu helfen.';
 $string['existingtours'] = 'Vorhandene Touren';
 $string['createnewtour'] = 'Tour erstellen';
@@ -41,7 +44,7 @@ $string['savetour'] = 'Tour speichern';
 $string['enabled'] = 'Aktiviert';
 $string['disabled'] = 'Deaktiviert';
 
-// Text editor strings
+// Text editor strings.
 $string['editstep'] = 'Tour-Schritt bearbeiten';
 $string['steptitle'] = 'Schritt-Titel';
 $string['stepcontent'] = 'Schritt-Inhalt';

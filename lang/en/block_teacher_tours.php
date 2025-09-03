@@ -24,12 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// phpcs:disable moodle.Files.LangFilesOrdering.UnexpectedComment
+// phpcs:disable moodle.Files.LangFilesOrdering.IncorrectOrder
+
 $string['pluginname'] = 'Teacher Tours';
 $string['teacher_tours:addinstance'] = 'Add a new teacher tours block';
 $string['teacher_tours:myaddinstance'] = 'Add a new teacher tours block to Dashboard';
 $string['teacher_tours:view'] = 'View the Teacher Tours block';
 
-// Template strings
+// Template strings.
 $string['blockdescription'] = 'Create guided tours for your course to help students navigate and understand course content.';
 $string['existingtours'] = 'Existing Tours';
 $string['createnewtour'] = 'Create Tour';
@@ -41,7 +44,7 @@ $string['savetour'] = 'Save Tour';
 $string['enabled'] = 'Enabled';
 $string['disabled'] = 'Disabled';
 
-// Text editor strings
+// Text editor strings.
 $string['editstep'] = 'Edit Tour Step';
 $string['steptitle'] = 'Step Title';
 $string['stepcontent'] = 'Step Content';
