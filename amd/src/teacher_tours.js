@@ -54,8 +54,12 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         let currentStepObject = {};
 
         // Init the tourobject and starts the editor
-        const init = function (courseid) {
+        const init = function (courseid, customTours) {
             initializeEventBindings();
+            Object.values(customTours).forEach(tour => {
+                console.log('tour', tour);
+                setPlacements(tour.placementid, courseid); //replace courseid with tour.id
+            });
             resetTourObject(courseid);
         };
 
@@ -206,6 +210,26 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 sticky = false;
                 highlightElements();
             },
+            stickyStartClick: function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = e.currentTarget;
+                let customtourid = element.dataset.customtourid;
+                //create_tour_from_custom
+                Ajax.call([{
+                methodname: 'block_teacher_tours_create_tour_from_custom',
+                args: { courseid: customtourid},//TODO replace courseid with custom tour id from plugin table
+            }])[0].then(function (response) {
+                console.log(response);
+                //If ok reset the tourObject, if not show error
+                if (!response && !response.status === 'ok') {
+                    alert('Error saving tour: ' + (response.message || 'Unknown error'));
+                }
+                //reload the page
+                window.location.reload();
+            });
+//TODO START TOUR WITH CUSTOM TOUR ID
+            },
             sectionClick: function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -258,6 +282,37 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             });
         };
 
+        const setPlacements = function (placementid, customtourid) {
+            Str.get_string('touravailable', 'block_teacher_tours').then(function (text) {
+                if (placementid.startsWith('section-')) {
+                    document.querySelectorAll('[id="' + placementid + '"]').forEach(section => {
+                        const button = document.createElement('button');
+                        button.dataset.customtourid = customtourid;
+                        button.className = 'btn btn-sm btn-outline-primary section-sticky-button';
+                        button.textContent = text + ' ';
+                        const icon = document.createElement('i');
+                        icon.className = 'fa fa-question-circle';
+                        button.append(icon);
+                        section.style.position = 'relative';
+                        section.prepend(button);
+                        button.addEventListener('click', tourEventHandlers.stickyStartClick);
+                    });
+                } else if (placementid === 'page-header') {
+                    document.querySelectorAll('[id="page-header"]').forEach(header => {
+                        const button = document.createElement('button');
+                        button.dataset.customtourid = customtourid;
+                        button.className = 'btn btn-sm btn-outline-primary header-sticky-button';
+                        button.textContent = text + ' ';
+                        const icon = document.createElement('i');
+                        icon.className = 'fa fa-question-circle';
+                        button.append(icon);
+                        header.style.position = 'relative';
+                        header.prepend(button);
+                        button.addEventListener('click', tourEventHandlers.stickyStartClick);
+                    });
+                }
+            });
+        };
 
         // Highlight the elements
         const highlightPlacements = function () {
@@ -340,15 +395,18 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             // Send the tourObject to the endpoint
             let argsObj = {};
             if (stickyTarget) {
-                argsObj = {tour: tourObject, stickytarget: stickyTarget};
+                tourObject.placementid = stickyTarget;
+                tourObject.custom = true;
+                argsObj = { tour: tourObject };
             } else {
-                argsObj = {tour: tourObject};
+                tourObject.custom = false;
+                argsObj = { tour: tourObject };
             }
-            //TODO change endpoint?
             Ajax.call([{
                 methodname: 'block_teacher_tours_save_tour',
                 args: argsObj,
             }])[0].then(function (response) {
+                console.log(response);
                 //If ok reset the tourObject, if not show error
                 if (!response && !response.status === 'ok') {
                     alert('Error saving tour: ' + (response.message || 'Unknown error'));
