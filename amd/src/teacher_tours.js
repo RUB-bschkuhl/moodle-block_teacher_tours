@@ -21,45 +21,7 @@
  */
 
 define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
-    function ($, Ajax, Str) { //Templates
-        /*  $step = new step();
-         $step->set_tourid($this->tour->get_id());
-         $step->set_title($title);
-         $step->set_content($content, FORMAT_HTML);
-         $step->set_targettype($targettype);
-         $step->set_targetvalue($targetvalue);
-         // Set any additional configuration options
-         foreach ($config as $key => $value) {
-             $step->set_config($key, $value);
-         } */
-
-        /*
-        Placement Options
-            placement (string)
-        Position of the step popup relative to the target element
-        Options: 'top', 'bottom', 'left', 'right'
-        Example: 'placement' => 'top'
-        Behavior Options
-            orphan (boolean)
-        Whether the step should be displayed even if the target element is not found
-        Example: 'orphan' => true
-            backdrop (boolean)
-        Whether to show a backdrop behind the tour step (highlighting the target element)
-        Example: 'backdrop' => true
-            reflex (boolean)
-        Whether clicking on the element will automatically advance to the next step
-        Example: 'reflex' => true
-        */
-
-        /*
-        $this->tour = new tour();
-        $this->tour->set_name($name);
-        $this->tour->set_description($description);
-        $this->tour->set_pathmatch($pathmatch);
-        $this->tour->set_enabled(tour::ENABLED);
-        $this->tour->set_filter_values('cssselector', ['#block-course-audit']);
-        $this->tour->set_sortorder(0);
-        */
+    function ($, Ajax, Str) {
 
         // JSON object that holds the information for the tour that is being sent to an endpoint when the teacher hits save
         let tourObject = {
