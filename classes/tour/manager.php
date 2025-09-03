@@ -117,14 +117,14 @@ class manager {
 
         $tour->persist();
 
-        // Handle steps update
+        // Handle steps update.
         if (isset($data['steps'])) {
-            // Remove existing steps
+            // Remove existing steps.
             foreach ($tour->get_steps() as $step) {
                 $step->remove();
             }
 
-            // Add new steps
+            // Add new steps.
             foreach ($data['steps'] as $stepdata) {
                 self::add_step_to_tour($tour, $stepdata);
             }
@@ -178,7 +178,7 @@ class manager {
     public static function get_course_tours($courseid, $enabledonly = false) {
         global $DB;
 
-        // Get all tours from the database
+        // Get all tours from the database.
         $sql = "SELECT * FROM {tool_usertours_tours} 
                 WHERE name LIKE :prefix 
                 AND pathmatch LIKE :pathmatch";
@@ -246,7 +246,7 @@ class manager {
         $step->set_title($stepdata['title'] ?? '');
         $step->set_content($stepdata['content'] ?? '');
 
-        // Determine target type and value based on step type
+        // Determine target type and value based on step type.
         if (isset($stepdata['type'])) {
             switch ($stepdata['type']) {
                 case 'activity':
@@ -270,12 +270,12 @@ class manager {
             $step->set_targetvalue($stepdata['target'] ?? '');
         }
 
-        // Set placement
+        // Set placement.
         if (isset($stepdata['placement'])) {
             $step->set_config('placement', $stepdata['placement']);
         }
 
-        // Set additional configurations
+        // Set additional configurations.
         $step->set_config('orphan', true); // Show even if target not found
         $step->set_config('backdrop', true); // Show backdrop
 
@@ -471,25 +471,25 @@ class manager {
             'reflex' => true,
         ]);
 
-        // Insert tour into database
+        // Insert tour into database.
         $tourid = $DB->insert_record('tool_usertours_tours', $tour);
 
         if (!$tourid) {
             return ['success' => false, 'error' => 'Failed to create tour'];
         }
 
-        // Create step records for tool_usertours_steps table
+        // Create step records for tool_usertours_steps table.
         foreach ($stepsdata as $index => $stepdata) {
             $step = new \stdClass();
             $step->tourid = $tourid;
             $step->title = $stepdata['title'] ?? '';
             $step->content = $stepdata['content'] ?? '';
 
-            // Handle targettype and targetvalue based on frontend selection
-            // In Moodle 5.0, targettype values are:
-            // 0 = SELECTOR (CSS selector like #module-123)
-            // 1 = BLOCK (block instance)
-            // 2 = UNATTACHED (no specific target)
+            // Handle targettype and targetvalue based on frontend selection.
+            // In Moodle 5.0, targettype values are:.
+            // 0 = SELECTOR (CSS selector like #module-123).
+            // 1 = BLOCK (block instance).
+            // 2 = UNATTACHED (no specific target).
             $targetvalue = $stepdata['targetvalue'] ?? '';
 
             // Ensure targetvalue has proper format for CSS selectors
@@ -498,7 +498,7 @@ class manager {
                 $targetvalue = '#' . $targetvalue;
             }
 
-            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0)
+            $step->targettype = $stepdata['targettype'] ?? 0; // Default to SELECTOR (0).
             $step->targetvalue = $targetvalue;
             $step->sortorder = $stepdata['sortorder'] ?? $index;
             $step->configdata = json_encode($stepdata['configdata'] ?? [
@@ -593,7 +593,7 @@ class manager {
             $DB->insert_record('tool_usertours_steps', $step);
         }
 
-        // Reset tour for all users so the updated tour is immediately visible
+        // Reset tour for all users so the updated tour is immediately visible.
         $tour = tour::instance($tourid);
         $tour?->mark_major_change();
 
@@ -634,7 +634,7 @@ class manager {
     public static function format_tour_for_frontend($tour) {
         $steps = [];
         foreach ($tour->get_steps() as $step) {
-            // Determine step type from target
+            // Determine step type from target.
             $type = 'element';
             $target = $step->get_targetvalue();
 
