@@ -706,7 +706,7 @@ class tour_api extends external_api {
                 if ($step['targettype'] === "2") {
                     $corestep->targettype = 2; // UNATTACHED.
                 } else {
-                    $corestep->targettype = 0; // default.
+                    $corestep->targettype = 0; // Default.
                 }
             } else {
                 $corestep->targettype = 0; // Default to SELECTOR.
