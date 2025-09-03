@@ -26,17 +26,47 @@
         {{#existing_tours}}
         <div class="existing-tours">
             <h5>{{#str}}existingtours, block_teacher_tours{{/str}}</h5>
-            <ul class="tour-list">
+            <div class="tour-list">
                 {{#tours}}
-                <li class="tour-item">
-                    <span class="tour-name">{{name}}</span>
-                    <span class="tour-status {{#enabled}}enabled{{/enabled}}{{^enabled}}disabled{{/enabled}}">
-                        {{#enabled}}{{#str}}enabled, block_teacher_tours{{/str}}{{/enabled}}
-                        {{^enabled}}{{#str}}disabled, block_teacher_tours{{/str}}{{/enabled}}
-                    </span>
-                </li>
+                <div class="tour-card" data-tour-id="{{id}}">
+                    <div class="tour-card-header">
+                        <div class="tour-info">
+                            <h6 class="tour-name">{{name}}</h6>
+                            <p class="tour-description">{{description}}</p>
+                        </div>
+                        <div class="tour-controls">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input tour-toggle" type="checkbox" 
+                                       id="tour-toggle-{{id}}" {{#enabled}}checked{{/enabled}} 
+                                       data-tour-id="{{id}}">
+                                <label class="form-check-label" for="tour-toggle-{{id}}">
+                                    <span class="enabled-text">{{#str}}enabled, block_teacher_tours{{/str}}</span>
+                                    <span class="disabled-text">{{#str}}disabled, block_teacher_tours{{/str}}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tour-card-footer">
+                        <small class="text-muted tour-status">
+                            {{#enabled}}
+                                <i class="fa fa-check-circle text-success"></i> {{#str}}enabled, block_teacher_tours{{/str}}
+                            {{/enabled}}
+                            {{^enabled}}
+                                <i class="fa fa-times-circle text-muted"></i> {{#str}}disabled, block_teacher_tours{{/str}}
+                            {{/enabled}}
+                        </small>
+                        <div class="tour-actions-small">
+                            <button class="btn btn-sm btn-outline-primary edit-tour" data-tour-id="{{id}}">
+                                <i class="fa fa-edit"></i> {{#str}}edit, moodle{{/str}}
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-tour" data-tour-id="{{id}}">
+                                <i class="fa fa-trash"></i> {{#str}}delete, moodle{{/str}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 {{/tours}}
-            </ul>
+            </div>
         </div>
         {{/existing_tours}}
         
@@ -44,12 +74,6 @@
             <button id="start-tour-creation" class="btn btn-primary tour-create-btn">
                 <i class="fa fa-plus"></i> {{#str}}createnewtour, block_teacher_tours{{/str}}
             </button>
-            
-            {{#existing_tours}}
-            <button id="manage-tours" class="btn btn-secondary tour-manage-btn">
-                <i class="fa fa-cog"></i> {{#str}}managetours, block_teacher_tours{{/str}}
-            </button>
-            {{/existing_tours}}
         </div>
     </div>
     

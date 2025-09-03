@@ -56,7 +56,7 @@ class block_teacher_tours extends block_base
         // Check if user has permission to view this block.
         $context = context_block::instance($this->instance->id);
 
-        //TODO get all tours for the current course
+        //TODO get all tours for the current context instead of only course
         $tours = $this->get_all_tours_for_course($this->page->course->id);
 
         if (has_capability('block/teacher_tours:view', $context)) {
@@ -68,8 +68,15 @@ class block_teacher_tours extends block_base
         }
 
         // Main block content
-        // TODO add tours to display
-        $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', []);
+        // Structure data for template
+        $templatedata = [];
+        if (!empty($tours)) {
+            $templatedata['existing_tours'] = [
+                'tours' => array_values($tours)
+            ];
+        }
+        
+        $this->content->text = $OUTPUT->render_from_template('block_teacher_tours/main', $templatedata);
 
         return $this->content;
     }

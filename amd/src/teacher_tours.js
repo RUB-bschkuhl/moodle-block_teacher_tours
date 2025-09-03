@@ -130,6 +130,60 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             currentStepObject = {};
         };
 
+        // Handle tour toggle switches
+        const handleTourToggle = function (tourId, enabled) {
+            console.log('Toggling tour', tourId, 'to', enabled ? 'enabled' : 'disabled');
+            // Update the status indicator in the footer
+            const tourCard = $(`[data-tour-id="${tourId}"]`);
+            const statusElement = tourCard.find('.tour-status');
+            if (enabled) {
+                Str.get_string('enabled', 'block_teacher_tours')
+                    .then(function (enabledText) {
+                        statusElement.html('<i class="fa fa-check-circle text-success"></i> ' + enabledText);
+                    });
+                tourCard.find('.tour-toggle').prop('checked', true);
+            } else {
+                Str.get_string('disabled', 'block_teacher_tours')
+                    .then(function (disabledText) {
+                        statusElement.html('<i class="fa fa-times-circle text-muted"></i> ' + disabledText);
+                    });
+                tourCard.find('.tour-toggle').prop('checked', false);
+            }
+            // TODO: Make AJAX call to backend to save the state
+            // Ajax.call([{
+            //     methodname: 'block_teacher_tours_toggle_tour',
+            //     args: { tourid: tourId, enabled: enabled }
+            // }]);
+        };
+
+        // Handle tour editing
+        const handleTourEdit = function (tourId) {
+            console.log('Editing tour', tourId);
+            // TODO: Should open the form in the backend to edit the tour
+            alert('Edit functionality will be implemented when backend is ready. Tour ID: ' + tourId);
+        };
+
+        // Handle tour deletion
+        const handleTourDelete = function (tourId) {
+            console.log('Deleting tour', tourId);
+            if (confirm('Are you sure you want to delete this tour? This action cannot be undone.')) {
+                // TODO: Make AJAX call to backend to save the state
+                // Ajax.call([{
+                //     methodname: 'block_teacher_tours_delete_tour',
+                //     args: { tourid: tourId, enabled: enabled }
+                // }]);
+                // For now, just hide the card
+                $(`[data-tour-id="${tourId}"]`).fadeOut(300, function () {
+                    $(this).remove();
+                    // Check if no tours left
+                    if ($('.tour-card').length === 0) {
+                        $('.existing-tours').hide();
+                    }
+                });
+                alert('Delete functionality will be implemented when backend is ready. Tour ID: ' + tourId);
+            }
+        };
+
         // Store event handlers for specific removal
         const tourEventHandlers = {
             sectionClick: function (e) {
@@ -332,6 +386,25 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
             $(document).on('click', '#step-creation', function () {
                 startEditor();
+            });
+
+            // Bind events for tour management
+            $(document).on('change', '.tour-toggle', function () {
+                const tourId = $(this).data('tour-id');
+                const enabled = $(this).is(':checked');
+                handleTourToggle(tourId, enabled);
+            });
+
+            $(document).on('click', '.edit-tour', function (e) {
+                e.preventDefault();
+                const tourId = $(this).data('tour-id');
+                handleTourEdit(tourId);
+            });
+
+            $(document).on('click', '.delete-tour', function (e) {
+                e.preventDefault();
+                const tourId = $(this).data('tour-id');
+                handleTourDelete(tourId);
             });
         };
 
