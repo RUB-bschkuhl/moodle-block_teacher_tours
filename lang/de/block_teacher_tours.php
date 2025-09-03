@@ -33,6 +33,7 @@ $string['teacher_tours:view'] = 'Den Lehrer Touren Block anzeigen';
 $string['blockdescription'] = 'Erstellen Sie geführte Touren für Ihren Kurs, um Studenten bei der Navigation und dem Verständnis der Kursinhalte zu helfen.';
 $string['existingtours'] = 'Vorhandene Touren';
 $string['createnewtour'] = 'Neue Tour erstellen';
+$string['createnewstickytour'] = 'Neue Sticky Tour erstellen';
 $string['managetours'] = 'Touren verwalten';
 $string['creatingtour'] = 'Neue Tour erstellen';
 $string['tourinstructions'] = 'Klicken Sie auf Kurselemente, um sie als Tour-Schritte hinzuzufügen, und fügen Sie dann Texte für jeden Schritt hinzu.';

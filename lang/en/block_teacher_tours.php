@@ -33,6 +33,7 @@ $string['teacher_tours:view'] = 'View the Teacher Tours block';
 $string['blockdescription'] = 'Create guided tours for your course to help students navigate and understand course content.';
 $string['existingtours'] = 'Existing Tours';
 $string['createnewtour'] = 'Create New Tour';
+$string['createnewstickytour'] = 'Create New Sticky Tour';
 $string['managetours'] = 'Manage Tours';
 $string['creatingtour'] = 'Creating New Tour';
 $string['tourinstructions'] = 'Click on course elements to add them as tour steps, then add text to each step.';
