@@ -35,7 +35,7 @@ $string['existingtours'] = 'Vorhandene Touren';
 $string['createnewtour'] = 'Neue Tour erstellen';
 $string['managetours'] = 'Touren verwalten';
 $string['creatingtour'] = 'Neue Tour erstellen';
-$string['tourinstructions'] = 'Klicken Sie auf Kurselemente, um sie als Tour-Schritte hinzuzufügen, und fügen Sie dann Beschreibungen für jeden Schritt hinzu.';
+$string['tourinstructions'] = 'Klicken Sie auf Kurselemente, um sie als Tour-Schritte hinzuzufügen, und fügen Sie dann Texte für jeden Schritt hinzu.';
 $string['savetour'] = 'Tour speichern';
 $string['enabled'] = 'Aktiviert';
 $string['disabled'] = 'Deaktiviert';
@@ -60,6 +60,8 @@ $string['advanced'] = 'Erweitert';
 $string['reflex'] = 'Automatisch weiter bei Klick';
 $string['addstep'] = 'Schritt hinzufügen';
 $string['preview'] = 'Vorschau';
+$string['currentlyediting'] = 'Aktuelles Ziel';
+$string['clearselection'] = 'Auswahl löschen';
 
 $string['privacy:metadata'] = 'Der Lehrer Touren Block speichert keine persönlichen Daten.';
 
