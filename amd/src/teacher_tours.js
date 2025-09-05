@@ -184,8 +184,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 });
             }
         };
+
         // Initialise style class for highlights
-        function hexToRgba(hex, opacity) {
+        const hexToRgba = function (hex, opacity){
             // Remove '#' if present
             hex = hex.replace(/^#/, '');
 
@@ -195,7 +196,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             let b = parseInt(hex.substring(4, 6), 16);
 
             return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        }
+        };
 
         const init_styles = function () {
             const colors = window.teachertoursColors;
@@ -385,11 +386,13 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 }
 
                 .tour-controls {
-                    margin-top: 8px;
+                    display: flex;
+                    justify-content: space-between;
                     flex-shrink: 0;
                 }
 
                 .form-switch {
+                padding-top: .25rem;
                     margin-bottom: 0;
                 }
 
@@ -405,8 +408,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 }
 
                 .tour-toggle:checked+.form-check-label .enabled-text {
-                    color: #28a745;
-                    font-weight: 500;
                 }
 
                 .tour-toggle:not(:checked)+.form-check-label .enabled-text {
@@ -421,8 +422,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-top: 12px;
-                    padding-top: 12px;
                     border-top: 1px solid #f8f9fa;
                 }
 
@@ -432,19 +431,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     gap: 6px;
                     font-size: 13px;
                 }
-
-                .tour-actions-small {
-                    display: flex;
-                    gap: 8px;
-                }
-
-                .tour-actions-small .btn {
-                    padding: 4px 8px;
-                    font-size: 12px;
-                }
                 
                 .tour-actions {
                     display: flex;
+                    flex-direction: column;
                     gap: 12px;
                 }
 
