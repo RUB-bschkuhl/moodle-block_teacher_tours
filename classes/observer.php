@@ -47,57 +47,44 @@ class observer {
 
         $eventdata = $event->get_data();
         $tourid = $eventdata['objectid'] ?? null;
-        $courseid = $eventdata['courseid'] ?? null;
 
         if (empty($tourid)) {
             return;
         }
 
-        // Check if this tour exists in block_teacher_tours table using courseid.
-        if (!empty($courseid)) {
-            $records = $DB->get_records('block_teacher_tours', ['courseid' => $courseid]);
-        } else {
-            // If no courseid in event, we need to get it from the tour itself.
-            try {
-                $tour = \tool_usertours\tour::instance($tourid);
-                $tourconfig = $tour->get_config();
-
-                // Check if tour is restricted to a specific course.
-                if (!empty($tourconfig->courseid)) {
-                    $courseid = $tourconfig->courseid;
-                }
-
-                if (empty($courseid)) {
-                    return; // No course association found.
-                }
-
-                $records = $DB->get_records('block_teacher_tours', ['courseid' => $courseid]);
-            } catch (\Exception $e) {
-                return; // Tour might already be deleted or inaccessible.
-            }
+        try {
+            $tour = \tool_usertours\tour::instance($tourid);
+        } catch (\Exception $e) {
+            // Tour might already be deleted or inaccessible.
+            return;
         }
 
-        $foundintable = !empty($records);
-        $recordtodelete = $foundintable ? reset($records) : null;
+        if (!$tour) {
+            return;
+        }
 
-        // Only delete if the tour was found in our block_teacher_tours table.
-        if ($foundintable) {
-            try {
-                // Get the tour instance.
-                $tour = \tool_usertours\tour::instance($tourid);
+        $tourconfig = $tour->get_config();
 
-                // Delete all steps first.
-                $steps = $tour->get_steps();
-                foreach ($steps as $step) {
-                    $step->remove();
-                }
+        if (empty($tourconfig) || empty($tourconfig->custom_tour_id)) {
+            // Only sticky tours (created from custom tours) should be removed.
+            return;
+        }
 
-                // Delete the tour.
-                $tour->remove();
-            } catch (\Exception $e) {
-                // Log the error but don't throw it to avoid breaking the event flow.
-                debugging('Error deleting teacher tour: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        $customtourid = (int)$tourconfig->custom_tour_id;
+        if ($customtourid <= 0 || !$DB->record_exists('block_teacher_tours', ['id' => $customtourid])) {
+            // No matching custom tour entry found, nothing to do.
+            return;
+        }
+
+        try {
+            $steps = $tour->get_steps();
+            foreach ($steps as $step) {
+                $step->remove();
             }
+            $tour->remove();
+        } catch (\Exception $e) {
+            // Log the error but don't throw it to avoid breaking the event flow.
+            debugging('Error deleting sticky teacher tour: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }
     }
 

@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$callbacks = [
-    [
-        'hook' => core\hook\navigation\secondary_extend::class,
-        'callback' => [\block_teacher_tours\local\hook_callbacks::class, 'secondary_extend'],
-        'priority' => 500,
-    ],
-];
+// $callbacks = [
+//     [
+//         'hook' => core\hook\navigation\secondary_extend::class,
+//         'callback' => [\block_teacher_tours\local\hook_callbacks::class, 'secondary_extend'],
+//         'priority' => 500,
+//     ],
+// ];

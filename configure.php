@@ -32,10 +32,10 @@ $action = optional_param('action', \tool_usertours\manager::ACTION_LISTTOURS, PA
 $courseid = 2;
 $url = new moodle_url('/blocks/teacher_tours/configure.php');
 $PAGE->set_context(context_course::instance($courseid = 2));
-$PAGE->set_url($url->out() );
+$PAGE->set_url($url->out());
 
 $pluginmanager = new \tool_usertours\manager();
 
-$pluginmanager->execute_generic(
+$pluginmanager->execute(
     $action
 );
