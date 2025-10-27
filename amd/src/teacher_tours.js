@@ -58,7 +58,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             init_styles();
             initializeEventBindings();
             Object.values(customTours).forEach(tour => {
-                console.log('tour', tour);
                 setPlacements(tour.placementid, courseid); //replace courseid with tour.id
             });
             resetTourObject(courseid);
@@ -109,12 +108,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         // Handle tour toggle switches
         const handleTourToggle = function (tourId, enabled) {
-            // console.log('Toggling tour', tourId, 'to', enabled ? 'enabled' : 'disabled');
-
             // Make AJAX call to backend to save the state
             Ajax.call([{
                 methodname: 'block_teacher_tours_toggle_tour_enabled',
-                args: {tourid: tourId, enabled: enabled}
+                args: { tourid: tourId, enabled: enabled }
             }])[0].done(function (response) {
                 if (response.success) {
                     // Update the UI based on the actual state from server.
@@ -134,7 +131,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                             });
                         tourCard.find('.tour-toggle').prop('checked', false);
                     }
-                    // console.log('Tour toggle successful');
                 } else {
                     // Revert the toggle if the operation failed
                     // console.error('Failed to toggle tour');
@@ -165,7 +161,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 // Make AJAX call to backend to delete the tour
                 Ajax.call([{
                     methodname: 'block_teacher_tours_delete_tour',
-                    args: {tourid: tourId}
+                    args: { tourid: tourId }
                 }])[0].done(function (response) {
                     if (response.success) {
                         // Remove the card from UI with animation
@@ -186,7 +182,7 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
         };
 
         // Initialise style class for highlights
-        const hexToRgba = function (hex, opacity){
+        const hexToRgba = function (hex, opacity) {
             // Remove '#' if present
             hex = hex.replace(/^#/, '');
 
@@ -474,6 +470,18 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 .btn.btn-sm.btn-outline-primary.section-sticky-button:hover {
                     color: inherit;
                 }
+
+                .btn.btn-sm.btn-outline-primary.section-sticky-button-temp {
+                    border-style: solid;
+                    position: absolute;
+                    top: -0.5rem;
+                    right: -0.5rem;
+                    background: white;
+                }
+ 
+                .btn.btn-sm.btn-outline-primary.section-sticky-button-temp:hover {
+                    color: inherit;
+                }
  
                 .btn.btn-sm.btn-outline-primary.header-sticky-highlight {
                     border-style: dashed;
@@ -490,6 +498,15 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     right: 0;
                     background: white;
                 }
+
+ 
+                .btn.btn-sm.btn-outline-primary.header-sticky-button-temp {
+                    border-style: solid;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    background: white;
+                }
  
                 .btn.btn-sm.btn-outline-primary.header-sticky-highlight:hover {
                     color: inherit;
@@ -499,6 +516,9 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     color: inherit;
                 }
  
+                .btn.btn-sm.btn-outline-primary.header-sticky-button-temp:hover {
+                    color: inherit;
+                }
             `;
 
             document.head.appendChild(style);
@@ -510,22 +530,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 e.preventDefault();
                 e.stopPropagation();
                 const element = e.currentTarget;
-                if (element.classList.contains('section-sticky-highlight')) {
-                    element.classList.remove('section-sticky-highlight');
-                    element.classList.add('section-sticky-button');
-                    Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
-                        element.html(text);
-                    });
-                } else if (element.classList.contains('header-sticky-highlight')) {
-                    element.classList.remove('header-sticky-highlight');
-                    element.classList.add('header-sticky-button');
-                    Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
-                        element.html(text);
-                    });
-                }
-                //todo element get parent and get id
+                addStickyButton(element);
                 let parent = element.parentElement;
                 stickyTarget = parent.getAttribute('id');
+
                 removeHighlighting();
                 sticky = false;
                 highlightElements();
@@ -537,18 +545,17 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 let customtourid = element.dataset.customtourid;
                 //create_tour_from_custom
                 Ajax.call([{
-                methodname: 'block_teacher_tours_create_tour_from_custom',
-                args: { courseid: customtourid},//TODO replace courseid with custom tour id from plugin table
-            }])[0].then(function (response) {
-                console.log(response);
-                //If ok reset the tourObject, if not show error
-                if (!response && !response.status === 'ok') {
-                    alert('Error saving tour: ' + (response.message || 'Unknown error'));
-                }
-                //reload the page
-                window.location.reload();
-            });
-//TODO START TOUR WITH CUSTOM TOUR ID
+                    methodname: 'block_teacher_tours_create_tour_from_custom',
+                    args: { courseid: customtourid },
+                }])[0].then(function (response) {
+                    //If ok reset the tourObject, if not show error
+                    if (!response && !response.status === 'ok') {
+                        alert('Error saving tour: ' + (response.message || 'Unknown error'));
+                    }
+                    //reload the page
+                    window.location.reload();
+                });
+                //TODO START TOUR WITH CUSTOM TOUR ID
             },
             sectionClick: function (e) {
                 e.preventDefault();
@@ -586,6 +593,29 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 removeHighlighting();
                 startTextEditor();
             }
+        };
+
+        const addStickyButton = function (element) {
+            if (element.classList.contains('section-sticky-highlight')) {
+                element.classList.add('section-sticky-button-temp');
+                Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
+                    element.html(text);
+                });
+            } else if (element.classList.contains('header-sticky-highlight')) {
+                element.classList.add('header-sticky-button-temp');
+                Str.get_string('selectplacement', 'block_teacher_tours').then(function (text) {
+                    element.html(text);
+                });
+            }
+        };
+
+        const removeStickyButton = function () {
+            document.querySelectorAll('.section-sticky-button-temp').forEach(element => {
+                element.classList.remove('section-sticky-button-temp');
+            });
+            document.querySelectorAll('.header-sticky-button-temp').forEach(element => {
+                element.classList.remove('header-sticky-button-temp');
+            });
         };
 
         // Highlight the elements
@@ -689,10 +719,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         const removeHighlighting = function () {
             if (sticky) {
-                document.querySelectorAll('.section-sticky-highlight').forEach(section => {
+                document.querySelectorAll('.section-sticky-highlight:not(.section-sticky-button-temp)').forEach(section => {
                     section.remove();
                 });
-                document.querySelectorAll('.header-sticky-highlight').forEach(mod => {
+                document.querySelectorAll('.header-sticky-highlight:not(.header-sticky-button-temp)').forEach(mod => {
                     mod.remove();
                 });
             } else {
@@ -706,7 +736,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                     mod.removeEventListener('click', tourEventHandlers.moduleClick);
                 });
             }
-
         };
 
         // Send the tourObject to the endpoint
@@ -726,7 +755,6 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 methodname: 'block_teacher_tours_save_tour',
                 args: argsObj,
             }])[0].then(function (response) {
-                console.log(response);
                 //If ok reset the tourObject, if not show error
                 if (!response && !response.status === 'ok') {
                     alert('Error saving tour: ' + (response.message || 'Unknown error'));
@@ -897,10 +925,11 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
                 $('#start-sticky-creation').show();
                 $('#start-tour-creation').show();
                 hideCurrentStepIndicator();
+                removeHighlighting();
+                removeStickyButton();
                 resetTourObject();
                 $('.tour-preview').html('');
                 $('.tour-preview').hide();
-
             });
 
             $(document).on('click', '#step-creation', function () {
