@@ -66,6 +66,7 @@ define([
         let shownTourIds = [];        // Array of tour keys already shown (e.g., 'standard_123', 'custom_456')
         let currentCourseId = null;   // Store course ID for queue operations
         let tourEndedListenerAdded = false; // Flag to prevent duplicate listeners
+        let manualTourInProgress = false; // Flag to prevent queue auto-start during manual tour
 
         // Init the tourobject and starts the editor
         const init = function (courseid, customTours) {
@@ -73,7 +74,10 @@ define([
             init_styles();
             initializeEventBindings();
             Object.values(customTours).forEach(tour => {
-                setPlacements(tour.placementid, courseid); //replace courseid with tour.id
+                // Only show placement buttons for enabled tours
+                if (tour.enabled) {
+                    setPlacements(tour.placementid, tour.id);
+                }
             });
             resetTourObject(courseid);
 
@@ -97,7 +101,6 @@ define([
             }])[0].done(function (tours) {
                 tourQueue = tours;
                 currentTourIndex = 0;
-                window.console.log('Teacher Tours: Queue initialized with', tours.length, 'tours', tours);
             }).fail(function (error) {
                 window.console.error('Teacher Tours: Failed to fetch pending tours', error);
                 tourQueue = [];
@@ -122,29 +125,30 @@ define([
          * @param {Event} e - The tour ended event
          */
         const handleTourEnded = function (e) {
-            window.console.log('Teacher Tours: Tour ended event received', e.detail);
-
             // Get the tour that just ended
             const endedTour = e.detail?.tour;
 
             if (endedTour) {
                 // Mark the ended tour as shown
-                const tourId = endedTour.tourId || endedTour.id;
-                if (tourId) {
+                const endedTourId = endedTour.tourId || endedTour.id;
+                if (endedTourId) {
                     // Check if this was a standard or custom tour
                     const config = endedTour.originalConfig || {};
                     if (config.custom_tour_id) {
                         shownTourIds.push('custom_' + config.custom_tour_id);
-                        window.console.log('Teacher Tours: Marked custom tour as shown:', config.custom_tour_id);
                     } else {
-                        shownTourIds.push('standard_' + tourId);
-                        window.console.log('Teacher Tours: Marked standard tour as shown:', tourId);
+                        shownTourIds.push('standard_' + endedTourId);
                     }
                 }
             }
 
+            // If this was a manually triggered tour, don't auto-start the next one
+            if (manualTourInProgress) {
+                manualTourInProgress = false;
+                return;
+            }
+
             // Small delay to let UI settle before starting next tour
-            window.console.log('Teacher Tours: Starting next in 500ms. Queue:', tourQueue.length);
             setTimeout(function () {
                 startNextTour();
             }, 500);
@@ -154,8 +158,6 @@ define([
          * Start the next tour in the queue.
          */
         const startNextTour = function () {
-            window.console.log('Teacher Tours: startNextTour. Index:', currentTourIndex, 'of', tourQueue.length);
-
             // Find the next tour that hasn't been shown
             while (currentTourIndex < tourQueue.length) {
                 const nextTour = tourQueue[currentTourIndex];
@@ -165,14 +167,11 @@ define([
 
                 // Skip if already shown
                 if (shownTourIds.includes(tourKey)) {
-                    window.console.log('Teacher Tours: Skipping already shown tour:', tourKey);
                     continue;
                 }
 
                 // Mark as shown
                 shownTourIds.push(tourKey);
-
-                window.console.log('Teacher Tours: Starting tour:', nextTour.name, '(' + nextTour.type + '_' + nextTour.id + ')');
 
                 if (nextTour.type === 'custom') {
                     // Start custom tour via our API
@@ -183,8 +182,6 @@ define([
                 }
                 return;
             }
-
-            window.console.log('Teacher Tours: No more tours in queue');
 
             // No more tours - refresh the queue for next time
             if (currentCourseId) {
@@ -198,17 +195,12 @@ define([
          * @param {number} tourId - The tour ID
          */
         const startStandardTourFromQueue = function (tourId) {
-            window.console.log('Teacher Tours: Fetching tour config for tour ID:', tourId);
-
             // Fetch the tour configuration and start it
             tourRepository.fetchTour(tourId)
                 .then(function (response) {
-                    window.console.log('Teacher Tours: Fetched tour response:', response);
-
                     if (response && response.hasOwnProperty('tourconfig')) {
                         return Templates.renderForPromise('tool_usertours/tourstep', response.tourconfig)
                             .then(function (result) {
-                                window.console.log('Teacher Tours: Template rendered, starting tour');
                                 startTourWithConfig(tourId, result.html, response.tourconfig);
                                 return;
                             });
@@ -334,15 +326,20 @@ define([
         };
 
         // Handle tour toggle switches
-        const handleTourToggle = function (tourId, enabled) {
+        const handleTourToggle = function (tourId, enabled, tourType) {
+            // Determine which endpoint to call based on tour type
+            const methodname = tourType === 'custom'
+                ? 'block_teacher_tours_toggle_custom_tour_enabled'
+                : 'block_teacher_tours_toggle_tour_enabled';
+
             // Make AJAX call to backend to save the state
             Ajax.call([{
-                methodname: 'block_teacher_tours_toggle_tour_enabled',
+                methodname: methodname,
                 args: { tourid: tourId, enabled: enabled }
             }])[0].done(function (response) {
                 if (response.success) {
                     // Update the UI based on the actual state from server.
-                    const tourCard = $(`[data-tour-id="${tourId}"]`);
+                    const tourCard = $(`[data-tour-id="${tourId}"][data-tour-type="${tourType}"]`);
                     const statusElement = tourCard.find('.tour-status');
 
                     if (response.enabled) {
@@ -360,43 +357,49 @@ define([
                     }
                 } else {
                     // Revert the toggle if the operation failed
-                    // console.error('Failed to toggle tour');
-                    const tourCard = $(`[data-tour-id="${tourId}"]`);
+                    const tourCard = $(`[data-tour-id="${tourId}"][data-tour-type="${tourType}"]`);
                     tourCard.find('.tour-toggle').prop('checked', !enabled);
                     alert('Failed to update tour status. Please try again.');
                 }
             }).fail(function () {
-                // console.error('Error toggling tour:', error);
                 // Revert the toggle on error
-                const tourCard = $(`[data-tour-id="${tourId}"]`);
+                const tourCard = $(`[data-tour-id="${tourId}"][data-tour-type="${tourType}"]`);
                 tourCard.find('.tour-toggle').prop('checked', !enabled);
                 alert('Error updating tour status. Please try again.');
             });
         };
 
         // Handle tour editing
-        const handleTourEdit = function (tourId) {
-            // console.log('Editing tour', tourId);
+        const handleTourEdit = function (tourId, tourType) {
             // TODO: Should open the form in the backend to edit the tour
-            alert('Edit functionality will be implemented when backend is ready. Tour ID: ' + tourId);
+            const tourTypeLabel = tourType === 'custom' ? 'Custom' : 'Standard';
+            alert('Edit functionality will be implemented when backend is ready. ' + tourTypeLabel + ' Tour ID: ' + tourId);
         };
 
         // Handle tour deletion
-        const handleTourDelete = function (tourId) {
-            // console.log('Deleting tour', tourId);
+        const handleTourDelete = function (tourId, tourType) {
             if (confirm('Are you sure you want to delete this tour? This action cannot be undone.')) {
+                // Determine which endpoint to call based on tour type
+                const methodname = tourType === 'custom'
+                    ? 'block_teacher_tours_delete_custom_tour'
+                    : 'block_teacher_tours_delete_tour';
+
                 // Make AJAX call to backend to delete the tour
                 Ajax.call([{
-                    methodname: 'block_teacher_tours_delete_tour',
+                    methodname: methodname,
                     args: { tourid: tourId }
                 }])[0].done(function (response) {
                     if (response.success) {
                         // Remove the card from UI with animation
-                        $(`[data-tour-id="${tourId}"]`).fadeOut(300, function () {
+                        $(`[data-tour-id="${tourId}"][data-tour-type="${tourType}"]`).fadeOut(300, function () {
                             $(this).remove();
-                            // Check if no tours left
-                            if ($('.tour-card').length === 0) {
+                            // Check if no standard tours left
+                            if ($('.existing-tours .tour-card').length === 0) {
                                 $('.existing-tours').hide();
+                            }
+                            // Check if no custom tours left
+                            if ($('.existing-custom-tours .tour-card').length === 0) {
+                                $('.existing-custom-tours').hide();
                             }
                         });
                     } else {
@@ -674,6 +677,36 @@ define([
                     border: 2px dashed #dee2e6;
                 }
 
+                /* Custom tour card styling */
+                .existing-custom-tours {
+                    margin-top: 20px;
+                }
+
+                .existing-custom-tours h5 {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .tour-card-custom {
+                    border-left: 4px solid #17a2b8 !important;
+                    background: linear-gradient(to right, rgba(23, 162, 184, 0.05), white);
+                }
+
+                .tour-card-custom:hover {
+                    border-left-color: #138496 !important;
+                }
+
+                .tour-card-custom .badge {
+                    font-size: 11px;
+                    font-weight: 500;
+                    padding: 3px 8px;
+                }
+
+                .tour-card-custom .badge i {
+                    margin-right: 3px;
+                }
+
                 .btn.btn-sm.btn-outline-primary.section-sticky-highlight {
                     border-style: dashed;
                     position: absolute;
@@ -770,19 +803,39 @@ define([
                 e.stopPropagation();
                 const element = e.currentTarget;
                 let customtourid = element.dataset.customtourid;
-                //create_tour_from_custom
+
+                // Mark this as a manual tour to prevent queue auto-start
+                manualTourInProgress = true;
+
+                // Get custom tour config by its ID (no core table records created)
                 Ajax.call([{
-                    methodname: 'block_teacher_tours_create_tour_from_custom',
-                    args: { courseid: customtourid },
+                    methodname: 'block_teacher_tours_start_custom_tour',
+                    args: { customtourid: parseInt(customtourid, 10) },
                 }])[0].then(function (response) {
-                    //If ok reset the tourObject, if not show error
-                    if (!response && !response.status === 'ok') {
-                        alert('Error saving tour: ' + (response.message || 'Unknown error'));
+                    if (response.success && response.tourconfig) {
+                        // Parse the tour config and start it directly
+                        const tourConfig = JSON.parse(response.tourconfig);
+
+                        // Render the tour template and start
+                        return Templates.renderForPromise('tool_usertours/tourstep', tourConfig)
+                            .then(function (result) {
+                                tourConfig.template = result.html;
+                                tourConfig.tourName = tourConfig.name;
+                                delete tourConfig.name;
+
+                                const tour = new BootstrapTour(tourConfig);
+                                tour.startTour(0);
+                                return;
+                            });
+                    } else {
+                        manualTourInProgress = false;
+                        alert('Error starting tour: ' + (response.message || 'Unknown error'));
                     }
-                    //reload the page
-                    window.location.reload();
+                }).fail(function (error) {
+                    manualTourInProgress = false;
+                    window.console.error('Error starting custom tour:', error);
+                    alert('Error starting tour. Please try again.');
                 });
-                //TODO START TOUR WITH CUSTOM TOUR ID
             },
             sectionClick: function (e) {
                 e.preventDefault();
@@ -1166,20 +1219,23 @@ define([
             // Bind events for tour management
             $(document).on('change', '.tour-toggle', function () {
                 const tourId = $(this).data('tour-id');
+                const tourType = $(this).data('tour-type') || 'standard';
                 const enabled = $(this).is(':checked');
-                handleTourToggle(tourId, enabled);
+                handleTourToggle(tourId, enabled, tourType);
             });
 
             $(document).on('click', '.edit-tour', function (e) {
                 e.preventDefault();
                 const tourId = $(this).data('tour-id');
-                handleTourEdit(tourId);
+                const tourType = $(this).data('tour-type') || 'standard';
+                handleTourEdit(tourId, tourType);
             });
 
             $(document).on('click', '.delete-tour', function (e) {
                 e.preventDefault();
                 const tourId = $(this).data('tour-id');
-                handleTourDelete(tourId);
+                const tourType = $(this).data('tour-type') || 'standard';
+                handleTourDelete(tourId, tourType);
             });
         };
 

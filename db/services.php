@@ -133,6 +133,28 @@ $functions = [
         'ajax'        => true,
         'capabilities' => 'moodle/course:view',
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_toggle_custom_tour_enabled' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'toggle_custom_tour_enabled',
+        'classpath'   => '',
+        'description' => 'Toggle custom tour enabled/disabled status',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:manageactivities',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_delete_custom_tour' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'delete_custom_tour',
+        'classpath'   => '',
+        'description' => 'Delete a custom tour',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:manageactivities',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
     ]
 ];
 
@@ -148,7 +170,9 @@ $services = [
             'block_teacher_tours_toggle_tour_enabled',
             'block_teacher_tours_create_tour_from_custom',
             'block_teacher_tours_get_pending_tours',
-            'block_teacher_tours_start_custom_tour'
+            'block_teacher_tours_start_custom_tour',
+            'block_teacher_tours_toggle_custom_tour_enabled',
+            'block_teacher_tours_delete_custom_tour'
         ],
         'restrictedusers' => 0,
         'enabled' => 1,

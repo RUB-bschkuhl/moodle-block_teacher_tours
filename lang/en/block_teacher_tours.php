@@ -77,3 +77,9 @@ $string['sectionhighlight_desc'] = 'Color used to highlight sections via the CSS
 // Consecutive tours
 $string['tournotfound'] = 'Tour not found';
 $string['nexttourstarting'] = 'Starting next tour...';
+
+// Custom tours
+$string['existingcustomtours'] = 'Sticky Tours';
+$string['stickytour'] = 'Sticky Tour';
+$string['sticky'] = 'Sticky';
+$string['customtournotfound'] = 'Custom tour not found';

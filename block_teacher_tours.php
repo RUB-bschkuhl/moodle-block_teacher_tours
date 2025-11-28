@@ -111,16 +111,34 @@ class block_teacher_tours extends block_base
     }
 
     /**
-     * Get all tours for the current course
+     * Get all custom tours for the current course with parsed rawdata
      *
-     * @param int $courseid
-     * @return array
+     * @param int $courseid The course ID to fetch custom tours for
+     * @return array Array of custom tour objects with parsed name and metadata
      */
     public function get_all_custom_tours_for_course($courseid)
     {
         global $DB;
         $tours = $DB->get_records('block_teacher_tours', ['courseid' => $courseid]);
-        return $tours;
+        
+        // Parse rawdata to extract name and other display fields
+        $parsedtours = [];
+        foreach ($tours as $tour) {
+            $tourdata = json_decode($tour->rawdata, true);
+            if ($tourdata) {
+                $parsedtour = new \stdClass();
+                $parsedtour->id = $tour->id;
+                $parsedtour->courseid = $tour->courseid;
+                $parsedtour->placementid = $tour->placementid;
+                $parsedtour->name = $tourdata['name'] ?? get_string('pluginname', 'block_teacher_tours');
+                $parsedtour->description = $tourdata['description'] ?? '';
+                $parsedtour->enabled = isset($tourdata['enabled']) ? (bool)$tourdata['enabled'] : true;
+                $parsedtour->stepcount = isset($tourdata['steps']) ? count($tourdata['steps']) : 0;
+                $parsedtour->iscustom = true;
+                $parsedtours[] = $parsedtour;
+            }
+        }
+        return $parsedtours;
     }
 
     /**

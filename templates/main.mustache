@@ -24,11 +24,11 @@
     
     <div class="tour-content">
         {{#existing_tours}}
-        <div class="existing-tours"> {{! TODO rename, make existing tours collapsible, tours should contain the steps }}
+        <div class="existing-tours">
             <h5>{{#str}}existingtours, block_teacher_tours{{/str}}</h5>
             <div class="tour-list">
                 {{#tours}}
-                <div class="tour-card" data-tour-id="{{id}}">
+                <div class="tour-card" data-tour-id="{{id}}" data-tour-type="standard">
                     <div class="tour-card-header">
                         <div class="tour-info">
                             <h6 class="tour-name">{{name}}</h6>
@@ -39,7 +39,7 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input tour-toggle" type="checkbox" 
                                        id="tour-toggle-{{id}}" {{#enabled}}checked{{/enabled}} 
-                                       data-tour-id="{{id}}">
+                                       data-tour-id="{{id}}" data-tour-type="standard">
                                 <label class="form-check-label" for="tour-toggle-{{id}}">
                                     <span class="enabled-text">
                                     <i class="icon fa-regular fa-eye fa-fw " title="Enable" role="img" aria-label="Enable"></i>
@@ -49,10 +49,10 @@
                                     </span>
                                 </label>
                             </div>
-                            <button class="btn btn-sm btn-outline-primary edit-tour" data-tour-id="{{id}}">
+                            <button class="btn btn-sm btn-outline-primary edit-tour" data-tour-id="{{id}}" data-tour-type="standard">
                                 <i class="fa fa-edit"></i> {{#str}}edit, moodle{{/str}}
                             </button>
-                            <button class="btn btn-sm btn-outline-danger delete-tour" data-tour-id="{{id}}">
+                            <button class="btn btn-sm btn-outline-danger delete-tour" data-tour-id="{{id}}" data-tour-type="standard">
                                 <i class="fa fa-trash"></i> {{#str}}delete, moodle{{/str}}
                             </button>
                         </div>
@@ -62,6 +62,54 @@
             </div>
         </div>
         {{/existing_tours}}
+        
+        {{#existing_custom_tours}}
+        <div class="existing-custom-tours">
+            <h5>{{#str}}existingcustomtours, block_teacher_tours{{/str}}</h5>
+            <div class="tour-list">
+                {{#tours}}
+                <div class="tour-card tour-card-custom" data-tour-id="{{id}}" data-tour-type="custom">
+                    <div class="tour-card-header">
+                        <div class="tour-info">
+                            <h6 class="tour-name">
+                                {{name}}
+                                <span class="badge bg-info ms-2" title="{{#str}}stickytour, block_teacher_tours{{/str}}">
+                                    <i class="fa fa-thumb-tack"></i> {{#str}}sticky, block_teacher_tours{{/str}}
+                                </span>
+                            </h6>
+                            {{#placementid}}
+                            <small class="text-muted">{{#str}}placement, block_teacher_tours{{/str}}: {{placementid}}</small>
+                            {{/placementid}}
+                        </div>
+                    </div>
+                    <div class="tour-card-footer">
+                        <div class="tour-controls w-100">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input tour-toggle" type="checkbox" 
+                                       id="custom-tour-toggle-{{id}}" {{#enabled}}checked{{/enabled}} 
+                                       data-tour-id="{{id}}" data-tour-type="custom">
+                                <label class="form-check-label" for="custom-tour-toggle-{{id}}">
+                                    <span class="enabled-text">
+                                    <i class="icon fa-regular fa-eye fa-fw " title="Enable" role="img" aria-label="Enable"></i>
+                                    </span>
+                                    <span class="disabled-text">
+                                    <i class="icon fa-regular fa-eye-slash fa-fw " title="Disable" role="img" aria-label="Disable"></i>
+                                    </span>
+                                </label>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary edit-tour" data-tour-id="{{id}}" data-tour-type="custom">
+                                <i class="fa fa-edit"></i> {{#str}}edit, moodle{{/str}}
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-tour" data-tour-id="{{id}}" data-tour-type="custom">
+                                <i class="fa fa-trash"></i> {{#str}}delete, moodle{{/str}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {{/tours}}
+            </div>
+        </div>
+        {{/existing_custom_tours}}
         
         <div class="tour-actions">
             <button id="start-tour-creation" class="btn btn-primary tour-create-btn">
