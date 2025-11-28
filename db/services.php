@@ -111,6 +111,28 @@ $functions = [
         'ajax'        => true,
         'capabilities' => 'moodle/course:manageactivities',
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_get_pending_tours' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'get_pending_tours',
+        'classpath'   => '',
+        'description' => 'Get all pending tours (standard + custom) for consecutive triggering',
+        'type'        => 'read',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:view',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
+    ],
+    
+    'block_teacher_tours_start_custom_tour' => [
+        'classname'   => 'block_teacher_tours\external\tour_api',
+        'methodname'  => 'start_custom_tour',
+        'classpath'   => '',
+        'description' => 'Start a custom tour by creating it in core tables',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => 'moodle/course:view',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE]
     ]
 ];
 
@@ -124,7 +146,9 @@ $services = [
             'block_teacher_tours_update_steps',
             'block_teacher_tours_start_tour',
             'block_teacher_tours_toggle_tour_enabled',
-            'block_teacher_tours_create_tour_from_custom'
+            'block_teacher_tours_create_tour_from_custom',
+            'block_teacher_tours_get_pending_tours',
+            'block_teacher_tours_start_custom_tour'
         ],
         'restrictedusers' => 0,
         'enabled' => 1,

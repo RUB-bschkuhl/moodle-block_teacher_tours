@@ -20,8 +20,15 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
-    function ($, Ajax, Str) {
+define([
+    'jquery',
+    'core/ajax',
+    'core/str',
+    'tool_usertours/events',
+    'tool_usertours/repository',
+    'core/templates',
+    'tool_usertours/tour'
+], function($, Ajax, Str, UserTourEvents, tourRepository, Templates, BootstrapTour) {
 
         // JSON object that holds the information for the tour that is being sent to an endpoint when the teacher hits save
         let tourObject = {
@@ -53,14 +60,234 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
 
         let currentStepObject = {};
 
+        // Tour queue state for consecutive tour triggering
+        let tourQueue = [];           // Array of {id, type, name, sortorder, placementid}
+        let currentTourIndex = 0;     // Index of current/next tour in queue
+        let shownTourIds = [];        // Array of tour keys already shown (e.g., 'standard_123', 'custom_456')
+        let currentCourseId = null;   // Store course ID for queue operations
+        let tourEndedListenerAdded = false; // Flag to prevent duplicate listeners
+
         // Init the tourobject and starts the editor
         const init = function (courseid, customTours) {
+            currentCourseId = courseid;
             init_styles();
             initializeEventBindings();
             Object.values(customTours).forEach(tour => {
                 setPlacements(tour.placementid, courseid); //replace courseid with tour.id
             });
             resetTourObject(courseid);
+
+            // Initialize consecutive tour system
+            initTourQueue(courseid);
+            setupTourEndedListener();
+        };
+
+        /**
+         * Initialize the tour queue by fetching pending tours from the server.
+         *
+         * @param {number} courseid - The course ID
+         */
+        const initTourQueue = function (courseid) {
+            Ajax.call([{
+                methodname: 'block_teacher_tours_get_pending_tours',
+                args: {
+                    courseid: courseid,
+                    shownids: JSON.stringify(shownTourIds)
+                }
+            }])[0].done(function (tours) {
+                tourQueue = tours;
+                currentTourIndex = 0;
+                window.console.log('Teacher Tours: Queue initialized with', tours.length, 'tours', tours);
+            }).fail(function (error) {
+                window.console.error('Teacher Tours: Failed to fetch pending tours', error);
+                tourQueue = [];
+            });
+        };
+
+        /**
+         * Setup the tour ended event listener for consecutive tour triggering.
+         */
+        const setupTourEndedListener = function () {
+            if (tourEndedListenerAdded) {
+                return;
+            }
+            tourEndedListenerAdded = true;
+
+            document.addEventListener(UserTourEvents.eventTypes.tourEnded, handleTourEnded);
+        };
+
+        /**
+         * Handle the tour ended event - start the next tour if available.
+         *
+         * @param {Event} e - The tour ended event
+         */
+        const handleTourEnded = function (e) {
+            window.console.log('Teacher Tours: Tour ended event received', e.detail);
+
+            // Get the tour that just ended
+            const endedTour = e.detail?.tour;
+
+            if (endedTour) {
+                // Mark the ended tour as shown
+                const tourId = endedTour.tourId || endedTour.id;
+                if (tourId) {
+                    // Check if this was a standard or custom tour
+                    const config = endedTour.originalConfig || {};
+                    if (config.custom_tour_id) {
+                        shownTourIds.push('custom_' + config.custom_tour_id);
+                        window.console.log('Teacher Tours: Marked custom tour as shown:', config.custom_tour_id);
+                    } else {
+                        shownTourIds.push('standard_' + tourId);
+                        window.console.log('Teacher Tours: Marked standard tour as shown:', tourId);
+                    }
+                }
+            }
+
+            // Small delay to let UI settle before starting next tour
+            window.console.log('Teacher Tours: Starting next in 500ms. Queue:', tourQueue.length);
+            setTimeout(function () {
+                startNextTour();
+            }, 500);
+        };
+
+        /**
+         * Start the next tour in the queue.
+         */
+        const startNextTour = function () {
+            window.console.log('Teacher Tours: startNextTour. Index:', currentTourIndex, 'of', tourQueue.length);
+
+            // Find the next tour that hasn't been shown
+            while (currentTourIndex < tourQueue.length) {
+                const nextTour = tourQueue[currentTourIndex];
+                const tourKey = nextTour.type + '_' + nextTour.id;
+
+                currentTourIndex++;
+
+                // Skip if already shown
+                if (shownTourIds.includes(tourKey)) {
+                    window.console.log('Teacher Tours: Skipping already shown tour:', tourKey);
+                    continue;
+                }
+
+                // Mark as shown
+                shownTourIds.push(tourKey);
+
+                window.console.log('Teacher Tours: Starting tour:', nextTour.name, '(' + nextTour.type + '_' + nextTour.id + ')');
+
+                if (nextTour.type === 'custom') {
+                    // Start custom tour via our API
+                    startCustomTourFromQueue(nextTour.id);
+                } else {
+                    // Start standard tour using Moodle's tour repository
+                    startStandardTourFromQueue(nextTour.id);
+                }
+                return;
+            }
+
+            window.console.log('Teacher Tours: No more tours in queue');
+
+            // No more tours - refresh the queue for next time
+            if (currentCourseId) {
+                initTourQueue(currentCourseId);
+            }
+        };
+
+        /**
+         * Start a standard tour from the queue.
+         *
+         * @param {number} tourId - The tour ID
+         */
+        const startStandardTourFromQueue = function (tourId) {
+            window.console.log('Teacher Tours: Fetching tour config for tour ID:', tourId);
+
+            // Fetch the tour configuration and start it
+            tourRepository.fetchTour(tourId)
+                .then(function (response) {
+                    window.console.log('Teacher Tours: Fetched tour response:', response);
+
+                    if (response && response.hasOwnProperty('tourconfig')) {
+                        return Templates.renderForPromise('tool_usertours/tourstep', response.tourconfig)
+                            .then(function (result) {
+                                window.console.log('Teacher Tours: Template rendered, starting tour');
+                                startTourWithConfig(tourId, result.html, response.tourconfig);
+                                return;
+                            });
+                    }
+                    // No tour config, try next tour
+                    window.console.warn('Teacher Tours: No tour config in response, trying next tour');
+                    startNextTour();
+                    return;
+                })
+                .catch(function (error) {
+                    // If this tour fails, try the next one
+                    window.console.error('Teacher Tours: Error fetching/starting tour:', error);
+                    startNextTour();
+                });
+        };
+
+        /**
+         * Start a tour with the given configuration.
+         *
+         * @param {number} tourId - The tour ID
+         * @param {string} template - The rendered template HTML
+         * @param {object} tourConfig - The tour configuration
+         */
+        const startTourWithConfig = function (tourId, template, tourConfig) {
+            // Sort out the tour name
+            tourConfig.tourName = tourConfig.name;
+            delete tourConfig.name;
+
+            // Add the template to the configuration
+            tourConfig.template = template;
+
+            // Process steps
+            tourConfig.steps = tourConfig.steps.map(function (step) {
+                if (typeof step.element !== 'undefined') {
+                    step.target = step.element;
+                    delete step.element;
+                }
+
+                if (typeof step.reflex !== 'undefined') {
+                    step.moveOnClick = !!step.reflex;
+                    delete step.reflex;
+                }
+
+                if (typeof step.content !== 'undefined') {
+                    step.body = step.content;
+                    delete step.content;
+                }
+
+                return step;
+            });
+
+            // Create and start the tour
+            const tour = new BootstrapTour(tourConfig);
+            tour.startTour(0);
+        };
+
+        /**
+         * Start a custom tour from the queue.
+         *
+         * @param {number} customTourId - The custom tour ID
+         */
+        const startCustomTourFromQueue = function (customTourId) {
+            Ajax.call([{
+                methodname: 'block_teacher_tours_start_custom_tour',
+                args: { customtourid: customTourId }
+            }])[0].done(function (response) {
+                if (response.success && response.tourid) {
+                    // Fetch and start the newly created core tour
+                    startStandardTourFromQueue(response.tourid);
+                } else {
+                    // If creation failed, try the next tour
+                    window.console.warn('Teacher Tours: Failed to start custom tour', response.message);
+                    startNextTour();
+                }
+            }).fail(function (error) {
+                window.console.error('Teacher Tours: AJAX error starting custom tour', error);
+                // If AJAX fails, try the next tour
+                startNextTour();
+            });
         };
 
         // Starts the picker at first
@@ -961,6 +1188,8 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             sticky: sticky,
             currentStepObject: currentStepObject,
             tourObject: tourObject,
+            tourQueue: tourQueue,
+            shownTourIds: shownTourIds,
             init: init,
             startEditor: startEditor,
             resetTourObject: resetTourObject,
@@ -969,7 +1198,10 @@ define(['jquery', 'core/ajax', 'core/str'], // 'core/templates'
             saveTour: saveTour,
             startTextEditor: startTextEditor,
             highlightElements: highlightElements,
-            initializeEventBindings: initializeEventBindings
+            initializeEventBindings: initializeEventBindings,
+            initTourQueue: initTourQueue,
+            startNextTour: startNextTour,
+            setupTourEndedListener: setupTourEndedListener
         };
     }
 );

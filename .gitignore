@@ -1,0 +1,103 @@
+# ===========================================
+# Moodle Plugin Development .gitignore
+# ===========================================
+
+# -------------------------------------------
+# Node.js / NPM
+# -------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# -------------------------------------------
+# PHP / Composer
+# -------------------------------------------
+vendor/
+composer.phar
+.phpunit.result.cache
+
+# -------------------------------------------
+# Build Artifacts (AMD modules)
+# -------------------------------------------
+# Uncomment if you don't want to track minified JS
+# amd/build/
+
+# -------------------------------------------
+# IDE & Editor Settings
+# -------------------------------------------
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.buildpath
+.settings/
+
+# -------------------------------------------
+# Operating System Files
+# -------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# -------------------------------------------
+# Moodle Specific
+# -------------------------------------------
+# Local config (should never be committed)
+config.php
+
+# MoodleData directory
+moodledata/
+
+# Behat/PHPUnit generated files
+behat.yml
+phpunit.xml
+
+# Cache and temp files
+.cache/
+temp/
+tmp/
+*.log
+
+# -------------------------------------------
+# Testing & Coverage
+# -------------------------------------------
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.phpunit.cache/
+
+# -------------------------------------------
+# Miscellaneous
+# -------------------------------------------
+*.bak
+*.backup
+*.orig
+*.tmp
+.env
+.env.local
+.env.*.local
+
+# -------------------------------------------
+# KEEP - Documentation Files (NOT ignored)
+# -------------------------------------------
+# README.md        - Project overview
+# History.md       - Changelog and version history
+# UPGRADING.md     - Upgrade notes and migration guides
+# CONTRIBUTING.md  - Contribution guidelines
+# TODO.md          - Task and feature tracking
+# -------------------------------------------
+ARCHITECTURE.md
+ISSUES.md

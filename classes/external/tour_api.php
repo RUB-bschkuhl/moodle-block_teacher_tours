@@ -790,4 +790,280 @@ class tour_api extends external_api
             'reload' => new external_value(PARAM_BOOL, 'Whether to reload the page', VALUE_OPTIONAL),
         ]);
     }
+
+    /**
+     * Parameters for get_pending_tours.
+     *
+     * @return external_function_parameters
+     */
+    public static function get_pending_tours_parameters(): external_function_parameters
+    {
+        return new external_function_parameters([
+            'courseid' => new external_value(PARAM_INT, 'Course ID'),
+            'shownids' => new external_value(PARAM_RAW, 'JSON array of tour IDs already shown in this session', VALUE_DEFAULT, '[]'),
+        ]);
+    }
+
+    /**
+     * Get all pending tours (standard + custom) for a course that the user hasn't completed.
+     *
+     * @param int $courseid Course ID
+     * @param string $shownids JSON array of tour IDs already shown
+     *
+     * @return array Array of pending tours with id, type, and sortorder
+     */
+    public static function get_pending_tours(int $courseid, string $shownids = '[]'): array
+    {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(self::get_pending_tours_parameters(), [
+            'courseid' => $courseid,
+            'shownids' => $shownids,
+        ]);
+
+        // Check course context.
+        $context = context_course::instance($params['courseid']);
+        self::validate_context($context);
+        require_capability('moodle/course:view', $context);
+
+        // Parse shown IDs from JSON
+        $showntourids = json_decode($params['shownids'], true) ?? [];
+
+        $pendingtours = [];
+
+        // 1. Fetch standard tours from tool_usertours_tours that match this course
+        $pathmatch = '/course/view.php?id=' . $params['courseid'];
+        $standardtours = $DB->get_records_sql(
+            "SELECT t.id, t.name, t.sortorder, t.configdata
+             FROM {tool_usertours_tours} t
+             WHERE t.enabled = 1
+             AND (t.pathmatch = :pathmatch OR t.pathmatch LIKE :pathmatchlike)
+             ORDER BY t.sortorder ASC",
+            [
+                'pathmatch' => $pathmatch,
+                'pathmatchlike' => '%/course/view.php%id=' . $params['courseid'] . '%',
+            ]
+        );
+
+        foreach ($standardtours as $tour) {
+            // Check if this is a teacher tour (has teacher_tour flag in configdata)
+            $configdata = json_decode($tour->configdata, true) ?? [];
+            if (empty($configdata['teacher_tour'])) {
+                continue; // Skip non-teacher tours
+            }
+
+            // Check if tour has been completed by this user using user preferences.
+            // In Moodle 5.0, tour completion is stored as a user preference.
+            $completionpref = 'tool_usertours_tour_completion_time_' . $tour->id;
+            $completed = get_user_preferences($completionpref, null, $USER->id) !== null;
+
+            // Skip if already completed or already shown in this session
+            $tourkey = 'standard_' . $tour->id;
+            if ($completed || in_array($tourkey, $showntourids)) {
+                continue;
+            }
+
+            $pendingtours[] = [
+                'id' => (int) $tour->id,
+                'type' => 'standard',
+                'name' => $tour->name,
+                'sortorder' => (int) $tour->sortorder,
+            ];
+        }
+
+        // 2. Fetch custom tours from block_teacher_tours
+        $customtours = $DB->get_records('block_teacher_tours', ['courseid' => $params['courseid']]);
+
+        foreach ($customtours as $customtour) {
+            // Check if already shown in this session
+            $tourkey = 'custom_' . $customtour->id;
+            if (in_array($tourkey, $showntourids)) {
+                continue;
+            }
+
+            // Parse rawdata to get sortorder and name
+            $tourdata = json_decode($customtour->rawdata, true) ?? [];
+            $sortorder = isset($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 1000;
+            $name = $tourdata['name'] ?? 'Custom Tour';
+
+            $pendingtours[] = [
+                'id' => (int) $customtour->id,
+                'type' => 'custom',
+                'name' => $name,
+                'sortorder' => $sortorder,
+                'placementid' => $customtour->placementid ?? '',
+            ];
+        }
+
+        // 3. Sort all tours by sortorder
+        usort($pendingtours, function ($a, $b) {
+            return $a['sortorder'] - $b['sortorder'];
+        });
+
+        return $pendingtours;
+    }
+
+    /**
+     * Return definition for get_pending_tours.
+     *
+     * @return external_multiple_structure
+     */
+    public static function get_pending_tours_returns(): external_multiple_structure
+    {
+        return new external_multiple_structure(
+            new external_single_structure([
+                'id' => new external_value(PARAM_INT, 'Tour ID'),
+                'type' => new external_value(PARAM_TEXT, 'Tour type: standard or custom'),
+                'name' => new external_value(PARAM_TEXT, 'Tour name'),
+                'sortorder' => new external_value(PARAM_INT, 'Sort order'),
+                'placementid' => new external_value(PARAM_TEXT, 'Placement ID for custom tours', VALUE_OPTIONAL),
+            ])
+        );
+    }
+
+    /**
+     * Parameters for start_custom_tour.
+     *
+     * @return external_function_parameters
+     */
+    public static function start_custom_tour_parameters(): external_function_parameters
+    {
+        return new external_function_parameters([
+            'customtourid' => new external_value(PARAM_INT, 'Custom tour ID from block_teacher_tours table'),
+        ]);
+    }
+
+    /**
+     * Start a custom tour by creating it in core tables and returning the core tour ID.
+     * This is used for consecutive tour triggering without page reload.
+     *
+     * @param int $customtourid Custom tour ID
+     *
+     * @return array Result with core tour ID
+     */
+    public static function start_custom_tour(int $customtourid): array
+    {
+        global $DB, $CFG, $USER;
+
+        $params = self::validate_parameters(self::start_custom_tour_parameters(), [
+            'customtourid' => $customtourid,
+        ]);
+
+        // Get the custom tour
+        $customtour = $DB->get_record('block_teacher_tours', ['id' => $params['customtourid']]);
+
+        if (!$customtour) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Custom tour not found',
+            ];
+        }
+
+        // Check course context
+        $context = context_course::instance($customtour->courseid);
+        self::validate_context($context);
+        require_capability('moodle/course:view', $context);
+
+        // Decode the raw data
+        $tourdata = json_decode($customtour->rawdata, true);
+        if (!$tourdata || empty($tourdata['steps'])) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Invalid tour data or no steps defined',
+            ];
+        }
+
+        // Prepare tour data for core table
+        $coretour = new \stdClass();
+        $coretour->name = $tourdata['name'] ?? 'Teacher Tour';
+        $coretour->description = $tourdata['description'] ?? '';
+        $coretour->pathmatch = $tourdata['pathmatch'] ?? '/course/view.php%id=' . $customtour->courseid;
+        $coretour->enabled = 1;
+        $coretour->sortorder = isset($tourdata['sortorder']) ? (int) $tourdata['sortorder'] : 0;
+
+        // Prepare configdata with user filter to target only current user
+        $configdata = [
+            'courseid' => $customtour->courseid,
+            'teacher_tour' => true,
+            'custom_tour_id' => $customtour->id,
+            'filtervalues' => [
+                'cssselector' => ["#nav-notification-popover-container[data-userid=\"{$USER->id}\"]"]
+            ]
+        ];
+        $coretour->configdata = json_encode($configdata);
+
+        // Insert tour into core table
+        $tourid = $DB->insert_record('tool_usertours_tours', $coretour);
+
+        if (!$tourid) {
+            return [
+                'success' => false,
+                'tourid' => 0,
+                'message' => 'Failed to create tour in core tables',
+            ];
+        }
+
+        // Insert steps into core table
+        foreach ($tourdata['steps'] as $index => $step) {
+            $corestep = new \stdClass();
+            $corestep->tourid = $tourid;
+            $corestep->title = $step['title'] ?? '';
+            $corestep->content = $step['content'] ?? '';
+
+            // Handle target type
+            if (isset($step['targettype']) && $step['targettype'] === "2") {
+                $corestep->targettype = 2; // UNATTACHED
+            } else {
+                $corestep->targettype = 0; // SELECTOR
+            }
+
+            // Handle target value
+            $targetvalue = $step['targetvalue'] ?? '';
+            if ($corestep->targettype === 0 && !empty($targetvalue)) {
+                if (!str_starts_with($targetvalue, '#') && !str_starts_with($targetvalue, '.')) {
+                    $targetvalue = '#' . $targetvalue;
+                }
+            }
+            $corestep->targetvalue = $targetvalue;
+            $corestep->sortorder = $index;
+
+            // Prepare step configdata
+            $stepconfig = [
+                'placement' => $step['placement'] ?? 'bottom',
+                'orphan' => isset($step['orphan']) && ($step['orphan'] === true || $step['orphan'] === 'true'),
+                'backdrop' => isset($step['backdrop']) && ($step['backdrop'] === true || $step['backdrop'] === 'true'),
+                'reflex' => isset($step['reflex']) && ($step['reflex'] === true || $step['reflex'] === 'true'),
+            ];
+            $corestep->configdata = json_encode($stepconfig);
+
+            $DB->insert_record('tool_usertours_steps', $corestep);
+        }
+
+        // Reset tour for current user so it's immediately visible
+        require_once($CFG->dirroot . '/admin/tool/usertours/classes/tour.php');
+        $tour = \tool_usertours\tour::instance($tourid);
+        $tour?->mark_major_change();
+
+        return [
+            'success' => true,
+            'tourid' => $tourid,
+            'message' => 'Custom tour started successfully',
+        ];
+    }
+
+    /**
+     * Return definition for start_custom_tour.
+     *
+     * @return external_single_structure
+     */
+    public static function start_custom_tour_returns(): external_single_structure
+    {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'Success status'),
+            'tourid' => new external_value(PARAM_INT, 'Core tour ID'),
+            'message' => new external_value(PARAM_TEXT, 'Result message'),
+        ]);
+    }
 }
