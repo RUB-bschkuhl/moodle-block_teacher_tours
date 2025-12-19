@@ -28,4 +28,4 @@ $plugin->component = 'block_teacher_tours';
 $plugin->version = 2025112801;
 $plugin->requires = 2025041400; // Moodle 5.0 .
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->supported = [500, 500]; // Moodle 5.0 .
+$plugin->supported = [405, 500]; // Moodle 5.0 .
